@@ -373,7 +373,7 @@ export const WHITELISTED_TOKENS: Token[] = [
  *
  * @example
  * ```typescript
- * import { getTokensByChainId } from '@yfi/sdk';
+ * import { getTokensByChainId } from 'yieldfi-sdk';
  *
  * const ethTokens = getTokensByChainId('1');
  * console.log(ethTokens); // All active tokens on Ethereum
@@ -396,7 +396,7 @@ export function getTokensByChainId(
  *
  * @example
  * ```typescript
- * import { getTokenByAddress } from '@yfi/sdk';
+ * import { getTokenByAddress } from 'yieldfi-sdk';
  *
  * const usdt = getTokenByAddress('0xdac17f958d2ee523a2206206994597c13d831ec7', '1');
  * console.log(usdt?.symbol); // 'USDT'
@@ -423,7 +423,7 @@ export function getTokenByAddress(
  *
  * @example
  * ```typescript
- * import { getTokensBySymbol } from '@yfi/sdk';
+ * import { getTokensBySymbol } from 'yieldfi-sdk';
  *
  * const yUSDTokens = getTokensBySymbol('yUSD');
  * // Returns yUSD tokens on all chains: Ethereum, Arbitrum, Base, etc.
@@ -449,7 +449,7 @@ export function getTokensBySymbol(
  *
  * @example
  * ```typescript
- * import { isTokenWhitelisted } from '@yfi/sdk';
+ * import { isTokenWhitelisted } from 'yieldfi-sdk';
  *
  * if (isTokenWhitelisted('0xdac17f958d2ee523a2206206994597c13d831ec7', '1')) {
  *   // USDT on Ethereum is whitelisted
@@ -469,7 +469,7 @@ export function isTokenWhitelisted(address: string, chainId: string): boolean {
  *
  * @example
  * ```typescript
- * import { getTokenDecimals } from '@yfi/sdk';
+ * import { getTokenDecimals } from 'yieldfi-sdk';
  *
  * const decimals = getTokenDecimals('0xdac17f958d2ee523a2206206994597c13d831ec7', '1');
  * console.log(decimals); // 6 (USDT has 6 decimals)
@@ -488,7 +488,7 @@ export function getTokenDecimals(
  *
  * @example
  * ```typescript
- * import { getSupportedChainIds } from '@yfi/sdk';
+ * import { getSupportedChainIds } from 'yieldfi-sdk';
  *
  * const chainIds = getSupportedChainIds();
  * // ['1', '10', '42161', '8453', ...]
@@ -508,7 +508,7 @@ export function getSupportedChainIds(): string[] {
  *
  * @example
  * ```typescript
- * import { formatTokenAmount } from '@yfi/sdk';
+ * import { formatTokenAmount } from 'yieldfi-sdk';
  *
  * // USDT has 6 decimals
  * const formatted = formatTokenAmount('1000000', '0xdac17f958d2ee523a2206206994597c13d831ec7', '1');
@@ -543,7 +543,7 @@ export function formatTokenAmount(
  *
  * @example
  * ```typescript
- * import { parseTokenAmount } from '@yfi/sdk';
+ * import { parseTokenAmount } from 'yieldfi-sdk';
  *
  * // USDT has 6 decimals
  * const raw = parseTokenAmount('1.5', '0xdac17f958d2ee523a2206206994597c13d831ec7', '1');

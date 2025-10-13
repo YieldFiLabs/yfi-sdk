@@ -12,7 +12,7 @@
  *   connectVyToken,
  *   CONTRACT_ADDRESSES,
  *   Chain
- * } from '@yfi/sdk';
+ * } from 'yieldfi-sdk';
  *
  * // You need to provide ABIs from your contract compilation or block explorer
  * const managerAbi = [...]; // Your Manager ABI
@@ -40,7 +40,7 @@
  * @example Using ethers.Contract Directly
  * ```typescript
  * import { Contract } from 'ethers';
- * import type { Manager, YToken, VyToken } from '@yfi/sdk';
+ * import type { Manager, YToken, VyToken } from 'yieldfi-sdk';
  *
  * const manager = new Contract(address, managerAbi, provider) as unknown as Manager;
  * const yToken = new Contract(address, yTokenAbi, signer) as unknown as YToken;
@@ -49,7 +49,7 @@
  *
  * @example ABI Type Definitions
  * ```typescript
- * import { ManagerABI, YTokenABI, VyTokenABI } from '@yfi/sdk';
+ * import { ManagerABI, YTokenABI, VyTokenABI } from 'yieldfi-sdk';
  *
  * // Use ABI types for documentation and type extraction
  * type DepositParams = Parameters<ManagerABI.UserMethods['deposit']>;

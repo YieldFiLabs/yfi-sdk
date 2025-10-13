@@ -1,17 +1,17 @@
-# @yfi/sdk
+# yieldfi-sdk
 
 Official YieldFi SDK for interacting with YieldFi services through the gateway.
 
 ## Installation
 
 ```bash
-npm install @yfi/sdk
+npm install yieldfi-sdk
 ```
 
 ## Quick Start
 
 ```typescript
-import { YieldFiSDK } from "@yfi/sdk";
+import { YieldFiSDK } from "yieldfi-sdk";
 
 // Initialize SDK (async)
 const sdk = await YieldFiSDK.create({
@@ -60,7 +60,7 @@ const sdk = await YieldFiSDK.create({
 });
 
 // Alternative: use the factory function
-import { createYieldFiSDK } from "@yfi/sdk";
+import { createYieldFiSDK } from "yieldfi-sdk";
 
 const sdk = await createYieldFiSDK({
   gatewayUrl: "https://gw.yield.fi",
@@ -210,7 +210,7 @@ import {
   getChainId,
   isChainSupported,
   getSupportedChains,
-} from "@yfi/sdk";
+} from "yieldfi-sdk";
 
 // Get all contract addresses for a chain
 const ethContracts = getContractAddresses(Chain.ETHEREUM);
@@ -259,7 +259,7 @@ import {
   getTokenDecimals,
   formatTokenAmount,
   parseTokenAmount,
-} from "@yfi/sdk";
+} from "yieldfi-sdk";
 
 // Get all tokens on Ethereum
 const ethTokens = getTokensByChainId("1");
@@ -338,7 +338,7 @@ The SDK provides TypeScript types for type-safe smart contract interactions usin
 For documentation and easier type checking, the SDK exports simplified ABI type definitions:
 
 ```typescript
-import { ManagerABI, YTokenABI, VyTokenABI } from "@yfi/sdk";
+import { ManagerABI, YTokenABI, VyTokenABI } from "yieldfi-sdk";
 
 // Use these types for documentation and type checking
 type DepositParams = Parameters<ManagerABI.UserMethods["deposit"]>;
@@ -378,7 +378,7 @@ import {
   connectVyToken,
   CONTRACT_ADDRESSES,
   Chain,
-} from "@yfi/sdk";
+} from "yieldfi-sdk";
 import { ethers, Contract } from "ethers";
 
 // Setup provider and signer
@@ -442,7 +442,7 @@ You can also use ethers.js `Contract` class directly with type casting:
 
 ```typescript
 import { Contract } from "ethers";
-import type { Manager, YToken, VyToken } from "@yfi/sdk";
+import type { Manager, YToken, VyToken } from "yieldfi-sdk";
 
 const manager = new Contract(
   CONTRACT_ADDRESSES[Chain.ETHEREUM].manager,
@@ -488,7 +488,7 @@ import {
   validateJWT,
   isTokenExpired,
   getTimeUntilExpiration,
-} from "@yfi/sdk";
+} from "yieldfi-sdk";
 
 // Decode a JWT token
 const payload = decodeJWT(accessToken);
@@ -522,7 +522,7 @@ import {
   NetworkError,
   ValidationError,
   ConfigurationError,
-} from "@yfi/sdk";
+} from "yieldfi-sdk";
 
 try {
   await sdk.auth.login(credentials);
@@ -647,7 +647,7 @@ npm test -- --coverage
 This SDK is written in TypeScript and provides full type definitions out of the box. No need for `@types` packages.
 
 ```typescript
-import { YieldFiSDK, Chain, LoginResponse } from "@yfi/sdk";
+import { YieldFiSDK, Chain, LoginResponse } from "yieldfi-sdk";
 
 // Full IntelliSense and type checking
 const sdk = await YieldFiSDK.create({
@@ -673,7 +673,7 @@ This SDK follows [Semantic Versioning](https://semver.org/):
 Check the SDK version:
 
 ```typescript
-import { YieldFiSDK } from "@yfi/sdk";
+import { YieldFiSDK } from "yieldfi-sdk";
 
 console.log(YieldFiSDK.getVersion()); // "0.1.0"
 ```

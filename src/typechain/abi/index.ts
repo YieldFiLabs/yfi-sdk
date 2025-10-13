@@ -12,7 +12,7 @@
  *
  * @example
  * ```typescript
- * import { ManagerABI, YTokenABI, VyTokenABI } from '@yfi/sdk';
+ * import { ManagerABI, YTokenABI, VyTokenABI } from 'yieldfi-sdk';
  *
  * // Use these types for documentation and type checking
  * type DepositParams = Parameters<ManagerABI.UserMethods['deposit']>;

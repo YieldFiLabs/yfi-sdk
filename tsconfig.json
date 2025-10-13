@@ -18,7 +18,7 @@
     "lib": ["ES2020"],
     "types": ["node", "jest"],
     "paths": {
-      "@yfi/sdk/*": ["./src/*"]
+      "yieldfi-sdk/*": ["./src/*"]
     },
     "baseUrl": "./"
   },

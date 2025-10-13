@@ -148,7 +148,7 @@ export const CONTRACT_ADDRESSES: Record<Chain, ChainContracts> = {
  *
  * @example
  * ```typescript
- * import { getContractAddresses, Chain } from '@yfi/sdk';
+ * import { getContractAddresses, Chain } from 'yieldfi-sdk';
  *
  * const addresses = getContractAddresses(Chain.ETHEREUM);
  * console.log(addresses.yUSD); // yUSD contract address on Ethereum
@@ -166,7 +166,7 @@ export function getContractAddresses(chain: Chain): ChainContracts {
  *
  * @example
  * ```typescript
- * import { getContractAddress, Chain } from '@yfi/sdk';
+ * import { getContractAddress, Chain } from 'yieldfi-sdk';
  *
  * const yUSDAddress = getContractAddress(Chain.ETHEREUM, 'yUSD');
  * ```
@@ -185,7 +185,7 @@ export function getContractAddress(
  *
  * @example
  * ```typescript
- * import { getChainId, Chain } from '@yfi/sdk';
+ * import { getChainId, Chain } from 'yieldfi-sdk';
  *
  * const chainId = getChainId(Chain.ETHEREUM); // '1'
  * ```
@@ -201,7 +201,7 @@ export function getChainId(chain: Chain): string {
  *
  * @example
  * ```typescript
- * import { getChainByChainId } from '@yfi/sdk';
+ * import { getChainByChainId } from 'yieldfi-sdk';
  *
  * const chain = getChainByChainId('1'); // Chain.ETHEREUM
  * ```
@@ -219,7 +219,7 @@ export function getChainByChainId(chainId: string): Chain | undefined {
  *
  * @example
  * ```typescript
- * import { isChainSupported, Chain } from '@yfi/sdk';
+ * import { isChainSupported, Chain } from 'yieldfi-sdk';
  *
  * if (isChainSupported(Chain.ETHEREUM)) {
  *   // Chain is supported
@@ -236,7 +236,7 @@ export function isChainSupported(chain: Chain): boolean {
  *
  * @example
  * ```typescript
- * import { getSupportedChains } from '@yfi/sdk';
+ * import { getSupportedChains } from 'yieldfi-sdk';
  *
  * const chains = getSupportedChains();
  * // [Chain.ETHEREUM, Chain.ARBITRUM, ...]

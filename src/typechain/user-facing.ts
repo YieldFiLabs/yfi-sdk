@@ -7,7 +7,7 @@
  * @example
  * ```typescript
  * import { Contract } from 'ethers';
- * import type { Manager, YToken, VyToken } from '@yfi/sdk';
+ * import type { Manager, YToken, VyToken } from 'yieldfi-sdk';
  *
  * // You need to provide your own ABI (from contract compilation or block explorer)
  * const managerAbi = [...]; // Your Manager contract ABI
