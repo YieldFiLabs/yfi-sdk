@@ -1,0 +1,80 @@
+{
+  "name": "@yfi/sdk",
+  "version": "0.1.0",
+  "description": "Official YieldFi SDK for interacting with YieldFi services and blockchain protocols",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "all": "npm run lint && npm run test:coverage && npm run build && npm run format",
+    "build": "tsc -b",
+    "dev": "tsc -b -w",
+    "clean": "rimraf dist && rimraf coverage",
+    "clean:all": "rimraf dist && rimraf coverage && rimraf node_modules",
+    "lint": "eslint . --ext .ts,.tsx --max-warnings=0",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:coverage:watch": "jest --coverage --watch",
+    "prepare": "npm run build",
+    "format": "prettier --write \"**/*.{js,ts,tsx,json,md,css,scss,yml,yaml,html,mdx}\" --ignore-path .prettierignore",
+    "typecheck": "tsc --noEmit",
+    "quality": "npm run typecheck && npm run lint && npm run test:coverage",
+    "preversion": "npm run quality",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags",
+    "prepublishOnly": "npm run lint && npm run test && npm run build"
+  },
+  "keywords": [
+    "yieldfi",
+    "sdk",
+    "blockchain",
+    "ethereum",
+    "web3",
+    "defi",
+    "finance",
+    "yield",
+    "api",
+    "client"
+  ],
+  "author": "YieldFi Team",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yieldfi/yieldfi-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yieldfi/yieldfi-sdk/issues"
+  },
+  "homepage": "https://github.com/yieldfi/yieldfi-sdk#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.34.0",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.25",
+    "@typescript-eslint/eslint-plugin": "^8.40.0",
+    "@typescript-eslint/parser": "^8.40.0",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.6.2",
+    "rimraf": "^5.0.5",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.41.0"
+  },
+  "dependencies": {
+    "axios": "^1.11.0",
+    "ethers": "^6.15.0",
+    "reflect-metadata": "^0.2.2",
+    "zod": "^3.23.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
