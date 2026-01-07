@@ -126,6 +126,65 @@ const newTokens = await sdk.auth.refresh({
 await sdk.auth.logout(accessToken);
 ```
 
+#### User Consent Management
+
+The SDK provides comprehensive consent management APIs for tracking user agreements and permissions. Consent records are immutable for audit compliance - once recorded, they cannot be deleted or revoked.
+
+**Available Consent Types:**
+- `TERMS_OF_SERVICE` - User acceptance of terms of service (required)
+- `PRIVACY_POLICY` - User acceptance of privacy policy (required)
+- `MARKETING` - User consent for marketing communications (optional)
+- `ANALYTICS` - User consent for analytics tracking (optional)
+- `COOKIES` - User consent for cookie usage (optional)
+
+```typescript
+const accessToken = localStorage.getItem("accessToken");
+
+// Record user consent
+const consent = await sdk.auth.recordConsent(accessToken, {
+  consentType: ConsentType.TERMS_OF_SERVICE,
+  version: "1.0",
+  granted: true,
+  metadata: {
+    documentHash: "0x...",
+    sourceUrl: "https://yield.fi/terms"
+  }
+});
+
+// Get specific consent by type
+const termsConsent = await sdk.auth.getConsent(
+  accessToken,
+  ConsentType.TERMS_OF_SERVICE,
+  "1.0" // Optional version
+);
+
+// Get all user consents (full audit trail)
+const allConsents = await sdk.auth.getUserConsents(accessToken);
+console.log(`User has ${allConsents.count} consent records`);
+
+// Get consent status summary (latest status for each type)
+const statuses = await sdk.auth.getConsentStatuses(accessToken);
+
+// Check if user has consented to marketing
+const marketingStatus = statuses.data.find(
+  s => s.consentType === ConsentType.MARKETING
+);
+
+if (marketingStatus?.granted) {
+  // User has consented, can send marketing emails
+  sendMarketingEmail();
+} else {
+  // Show consent banner
+  showConsentBanner();
+}
+```
+
+**Important Notes:**
+- All consent APIs require authentication (JWT access token)
+- Consent records are immutable - once created, they cannot be deleted or revoked
+- Each consent type can have multiple versions (e.g., terms v1.0, v2.0)
+- Consent records include IP address and user agent for audit purposes
+
 ### Glassbook (`sdk.glassbook`)
 
 All Glassbook API methods require an access token. The API provides Partner Transaction (PTX) and Referral endpoints.
