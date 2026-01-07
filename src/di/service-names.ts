@@ -12,6 +12,7 @@ export const SERVICE_NAMES = {
   // API clients
   AUTH_API: "authAPI",
   GLASSBOOK_API: "glassbookAPI",
+  VAULT_API: "vaultAPI",
 } as const;
 
 export type ServiceName = (typeof SERVICE_NAMES)[keyof typeof SERVICE_NAMES];

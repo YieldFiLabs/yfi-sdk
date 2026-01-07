@@ -8,6 +8,8 @@ import { ConfigurationError } from "../errors";
 import { HttpClient } from "../http";
 import { AuthAPI } from "../api/auth";
 import { GlassbookAPI } from "../api/glassbook";
+import { VaultAPI } from "../api/vault";
+import { V3API } from "./v3";
 
 /**
  * YieldFi SDK initialization options
@@ -31,6 +33,12 @@ export class YieldFiSDK {
      * Glassbook API
      */
     public glassbook!: GlassbookAPI;
+
+    /**
+     * V3 API namespace
+     * Contains all APIs available in version 3
+     */
+    public v3!: V3API;
 
     /**
      * SDK configuration
@@ -108,6 +116,10 @@ export class YieldFiSDK {
             SERVICE_NAMES.GLASSBOOK_API,
         );
 
+        // Initialize versioned API namespaces
+        const vaultAPI = this.container.get<VaultAPI>(SERVICE_NAMES.VAULT_API);
+        this.v3 = new V3API(vaultAPI);
+
         // Future extensibility:
         // - Loading remote config
         // - Validating gateway connection
@@ -159,6 +171,21 @@ export class YieldFiSDK {
             SERVICE_NAMES.GLASSBOOK_API,
             () =>
                 new GlassbookAPI(
+                    this.container.get(SERVICE_NAMES.HTTP_CLIENT),
+                    this.container.get(SERVICE_NAMES.CONFIG),
+                ),
+            {
+                singleton: true,
+                lazy: false, // Actively loaded
+                dependencies: [SERVICE_NAMES.HTTP_CLIENT, SERVICE_NAMES.CONFIG],
+            },
+        );
+
+        // Register VaultAPI (singleton, not lazy)
+        this.container.register(
+            SERVICE_NAMES.VAULT_API,
+            () =>
+                new VaultAPI(
                     this.container.get(SERVICE_NAMES.HTTP_CLIENT),
                     this.container.get(SERVICE_NAMES.CONFIG),
                 ),
