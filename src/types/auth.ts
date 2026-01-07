@@ -213,8 +213,8 @@ export interface UserConsent {
   /** Ethereum address of the user who provided consent */
   userAddress: string;
   
-  /** Type of consent (TERMS_OF_SERVICE, PRIVACY_POLICY, MARKETING, etc.) */
-  consentType: ConsentType;
+  /** Type of consent (can be ConsentType enum or any string) */
+  consentType: ConsentType | string;
   
   /** Version of the consent document (e.g., '1.0', '2.1') */
   version: string;
@@ -249,7 +249,7 @@ export interface UserConsent {
  */
 export interface RecordConsentRequest {
   /** Type of consent to record */
-  consentType: ConsentType;
+  consentType: ConsentType | string;
   
   /** Version of the consent document (e.g., '1.0', '2.1') */
   version: string;
@@ -293,8 +293,8 @@ export interface GetUserConsentsResponse {
  * whether it was granted, the version, and relevant timestamps.
  */
 export interface ConsentStatus {
-  /** Type of consent */
-  consentType: ConsentType;
+  /** Type of consent (can be ConsentType enum or any string) */
+  consentType: ConsentType | string;
   
   /** Version of the consent document */
   version: string;

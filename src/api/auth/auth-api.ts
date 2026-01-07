@@ -200,11 +200,13 @@ export class AuthAPI {
    * Once consent is recorded, it cannot be deleted or revoked (for audit compliance).
    * 
    * **Consent Types:**
-   * - `TERMS_OF_SERVICE` - User acceptance of terms of service
-   * - `PRIVACY_POLICY` - User acceptance of privacy policy
-   * - `MARKETING` - User consent for marketing communications
-   * - `ANALYTICS` - User consent for analytics tracking
-   * - `COOKIES` - User consent for cookie usage
+   * You can use the `ConsentType` enum for convenience, or pass any string value.
+   * Common consent types include:
+   * - `TERMS_OF_SERVICE` / `'terms_of_service'` - User acceptance of terms of service
+   * - `PRIVACY_POLICY` / `'privacy_policy'` - User acceptance of privacy policy
+   * - `MARKETING` / `'marketing'` - User consent for marketing communications
+   * - `ANALYTICS` / `'analytics'` - User consent for analytics tracking
+   * - `COOKIES` / `'cookies'` - User consent for cookie usage
    * 
    * **Important:** Consent records are immutable for audit purposes. Once granted, 
    * consent cannot be revoked or deleted, ensuring a complete audit trail.
@@ -213,7 +215,7 @@ export class AuthAPI {
    *
    * @param accessToken Access token for authentication (required)
    * @param request Consent data to record
-   * @param request.consentType Type of consent (TERMS_OF_SERVICE, PRIVACY_POLICY, MARKETING, ANALYTICS, COOKIES)
+   * @param request.consentType Type of consent (can be ConsentType enum or any string)
    * @param request.version Version of the consent document (e.g., '1.0', '2.1')
    * @param request.granted Whether consent is granted (defaults to true)
    * @param request.metadata Optional metadata (e.g., document hash, source URL)
@@ -224,7 +226,7 @@ export class AuthAPI {
    * ```typescript
    * const accessToken = localStorage.getItem('accessToken');
    * 
-   * // Record terms of service consent
+   * // Record terms of service consent (using enum)
    * const consent = await sdk.auth.recordConsent(accessToken, {
    *   consentType: ConsentType.TERMS_OF_SERVICE,
    *   version: '1.0',
@@ -235,7 +237,14 @@ export class AuthAPI {
    *   }
    * });
    * 
-   * // Record marketing consent
+   * // Record consent (using string)
+   * await sdk.auth.recordConsent(accessToken, {
+   *   consentType: 'custom_consent_type',
+   *   version: '1.0',
+   *   granted: true
+   * });
+   * 
+   * // Record marketing consent (using enum)
    * await sdk.auth.recordConsent(accessToken, {
    *   consentType: ConsentType.MARKETING,
    *   version: '1.0',
@@ -281,7 +290,7 @@ export class AuthAPI {
    * GET /auth/consent/:consentType
    *
    * @param accessToken Access token for authentication (required)
-   * @param consentType Type of consent to retrieve (TERMS_OF_SERVICE, PRIVACY_POLICY, MARKETING, ANALYTICS, COOKIES)
+   * @param consentType Type of consent to retrieve (can be ConsentType enum or any string)
    * @param version Optional version of the consent document (e.g., '1.0'). If not provided, returns the latest consent
    * @returns Consent record with full details including granted status, timestamps, IP address, and metadata
    * @throws {AuthenticationError} If authentication fails or consent not found
@@ -290,10 +299,16 @@ export class AuthAPI {
    * ```typescript
    * const accessToken = localStorage.getItem('accessToken');
    * 
-   * // Get latest terms of service consent
+   * // Get latest terms of service consent (using enum)
    * const consent = await sdk.auth.getConsent(
    *   accessToken,
    *   ConsentType.TERMS_OF_SERVICE
+   * );
+   * 
+   * // Get latest consent (using string)
+   * const consent = await sdk.auth.getConsent(
+   *   accessToken,
+   *   'custom_consent_type'
    * );
    * 
    * // Get specific version of privacy policy consent
@@ -304,13 +319,13 @@ export class AuthAPI {
    * );
    * 
    * if (consent.data.granted) {
-   *   console.log('User has consented to terms of service');
+   *   console.log('User has consented');
    * }
    * ```
    */
   async getConsent(
     accessToken: string,
-    consentType: ConsentType,
+    consentType: ConsentType | string,
     version?: string,
   ): Promise<GetConsentResponse> {
     try {
