@@ -13,7 +13,7 @@ export const DEFAULT_CONFIG: Partial<SDKConfig> = {
     auth: "auth",
     glassbook: "gb",
     keystone: "ks",
-    vault: "v3",
+    vault: "vault",
   },
   timeout: 30000,
   retryAttempts: 3,
