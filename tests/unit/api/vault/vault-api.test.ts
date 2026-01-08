@@ -77,13 +77,11 @@ describe("VaultAPI", () => {
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getProtocolStats(testAccessToken);
+            const result = await vaultAPI.getProtocolStats();
 
             expect(result).toEqual(expectedResponse);
-            expect(mockHttpClient.get).toHaveBeenCalledWith("/vault/api/vaults/protocol/stats", {
-                headers: {
-                    Authorization: `Bearer ${testAccessToken}`,
-                },
+            expect(mockHttpClient.get).toHaveBeenCalledWith("/vault/api/public/vaults/protocol/stats", {
+                headers: {},
             });
         });
 
@@ -91,7 +89,7 @@ describe("VaultAPI", () => {
             const networkError = new NetworkError("Network error");
             mockHttpClient.get.mockRejectedValue(networkError);
 
-            await expect(vaultAPI.getProtocolStats(testAccessToken)).rejects.toThrow(NetworkError);
+            await expect(vaultAPI.getProtocolStats()).rejects.toThrow(NetworkError);
         });
     });
 
@@ -177,13 +175,11 @@ describe("VaultAPI", () => {
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getVaults(testAccessToken);
+            const result = await vaultAPI.getVaults();
 
             expect(result).toEqual(expectedResponse);
-            expect(mockHttpClient.get).toHaveBeenCalledWith("/vault/api/vaults", {
-                headers: {
-                    Authorization: `Bearer ${testAccessToken}`,
-                },
+            expect(mockHttpClient.get).toHaveBeenCalledWith("/vault/api/public/vaults", {
+                headers: {},
             });
         });
 
@@ -208,15 +204,13 @@ describe("VaultAPI", () => {
                 pageSize: 20,
             };
 
-            const result = await vaultAPI.getVaults(testAccessToken, filters);
+            const result = await vaultAPI.getVaults(filters);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                "/vault/api/vaults?chainId=1&status=active&page=1&pageSize=20",
+                "/vault/api/public/vaults?chainId=1&status=active&page=1&pageSize=20",
                 {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
+                    headers: {},
                 },
             );
         });
@@ -225,7 +219,7 @@ describe("VaultAPI", () => {
             const networkError = new NetworkError("Network error");
             mockHttpClient.get.mockRejectedValue(networkError);
 
-            await expect(vaultAPI.getVaults(testAccessToken)).rejects.toThrow(NetworkError);
+            await expect(vaultAPI.getVaults()).rejects.toThrow(NetworkError);
         });
     });
 
@@ -278,15 +272,13 @@ describe("VaultAPI", () => {
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getVaultByAddress(testAccessToken, testVaultAddress, testChainId);
+            const result = await vaultAPI.getVaultByAddress(testVaultAddress, testChainId);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}?chainId=${testChainId}`,
+                `/vault/api/public/vaults/${testVaultAddress}?chainId=${testChainId}`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
+                    headers: {},
                 },
             );
         });
@@ -342,7 +334,6 @@ describe("VaultAPI", () => {
             const userAddress = "0x944416e5df03ee4c14ec44c01495005564e6b07e";
 
             const result = await vaultAPI.getVaultByAddress(
-                testAccessToken,
                 testVaultAddress,
                 testChainId,
                 userAddress,
@@ -350,11 +341,9 @@ describe("VaultAPI", () => {
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}?chainId=${testChainId}&userAddress=${userAddress}`,
+                `/vault/api/public/vaults/${testVaultAddress}?chainId=${testChainId}&userAddress=${userAddress}`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
+                    headers: {},
                 },
             );
         });
@@ -364,7 +353,7 @@ describe("VaultAPI", () => {
             mockHttpClient.get.mockRejectedValue(networkError);
 
             await expect(
-                vaultAPI.getVaultByAddress(testAccessToken, testVaultAddress, testChainId),
+                vaultAPI.getVaultByAddress(testVaultAddress, testChainId),
             ).rejects.toThrow(NetworkError);
         });
     });
@@ -390,15 +379,13 @@ describe("VaultAPI", () => {
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getVaultState(testAccessToken, testVaultAddress, testChainId);
+            const result = await vaultAPI.getVaultState(testVaultAddress, testChainId);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/state?chainId=${testChainId}`,
+                `/vault/api/public/vaults/${testVaultAddress}/state?chainId=${testChainId}`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
+                    headers: {},
                 },
             );
         });
@@ -423,15 +410,13 @@ describe("VaultAPI", () => {
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getVaultState(testAccessToken, testVaultAddress);
+            const result = await vaultAPI.getVaultState(testVaultAddress);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/state?chainId=1`,
+                `/vault/api/public/vaults/${testVaultAddress}/state?chainId=1`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
+                    headers: {},
                 },
             );
         });
@@ -440,7 +425,7 @@ describe("VaultAPI", () => {
             const networkError = new NetworkError("Network error");
             mockHttpClient.get.mockRejectedValue(networkError);
 
-            await expect(vaultAPI.getVaultState(testAccessToken, testVaultAddress, testChainId)).rejects.toThrow(
+            await expect(vaultAPI.getVaultState(testVaultAddress, testChainId)).rejects.toThrow(
                 NetworkError,
             );
         });
@@ -482,15 +467,13 @@ describe("VaultAPI", () => {
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getVaultDetails(testAccessToken, testVaultAddress, testChainId);
+            const result = await vaultAPI.getVaultDetails(testVaultAddress, testChainId);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/details?chainId=${testChainId}`,
+                `/vault/api/public/vaults/${testVaultAddress}/details?chainId=${testChainId}`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
+                    headers: {},
                 },
             );
         });
@@ -524,15 +507,13 @@ describe("VaultAPI", () => {
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getVaultDetails(testAccessToken, testVaultAddress);
+            const result = await vaultAPI.getVaultDetails(testVaultAddress);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/details?chainId=1`,
+                `/vault/api/public/vaults/${testVaultAddress}/details?chainId=1`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
+                    headers: {},
                 },
             );
         });
@@ -542,7 +523,7 @@ describe("VaultAPI", () => {
             mockHttpClient.get.mockRejectedValue(networkError);
 
             await expect(
-                vaultAPI.getVaultDetails(testAccessToken, testVaultAddress, testChainId),
+                vaultAPI.getVaultDetails(testVaultAddress, testChainId),
             ).rejects.toThrow(NetworkError);
         });
     });
@@ -572,15 +553,13 @@ describe("VaultAPI", () => {
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getWhitelistedAssets(testAccessToken, testVaultAddress, testChainId);
+            const result = await vaultAPI.getWhitelistedAssets(testVaultAddress, testChainId);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/assets?chainId=${testChainId}`,
+                `/vault/api/public/vaults/${testVaultAddress}/assets?chainId=${testChainId}`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
+                    headers: {},
                 },
             );
         });
@@ -597,7 +576,6 @@ describe("VaultAPI", () => {
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
             const result = await vaultAPI.getWhitelistedAssets(
-                testAccessToken,
                 testVaultAddress,
                 testChainId,
                 true,
@@ -605,11 +583,9 @@ describe("VaultAPI", () => {
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/assets?chainId=${testChainId}&includeInactive=true`,
+                `/vault/api/public/vaults/${testVaultAddress}/assets?chainId=${testChainId}&includeInactive=true`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
+                    headers: {},
                 },
             );
         });
@@ -625,15 +601,13 @@ describe("VaultAPI", () => {
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getWhitelistedAssets(testAccessToken, testVaultAddress);
+            const result = await vaultAPI.getWhitelistedAssets(testVaultAddress);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/assets?chainId=1`,
+                `/vault/api/public/vaults/${testVaultAddress}/assets?chainId=1`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
+                    headers: {},
                 },
             );
         });
@@ -643,7 +617,7 @@ describe("VaultAPI", () => {
             mockHttpClient.get.mockRejectedValue(networkError);
 
             await expect(
-                vaultAPI.getWhitelistedAssets(testAccessToken, testVaultAddress, testChainId),
+                vaultAPI.getWhitelistedAssets(testVaultAddress, testChainId),
             ).rejects.toThrow(NetworkError);
         });
     });
@@ -670,7 +644,6 @@ describe("VaultAPI", () => {
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
             const result = await vaultAPI.getWhitelistedAsset(
-                testAccessToken,
                 testVaultAddress,
                 testAssetAddress,
                 testChainId,
@@ -678,11 +651,9 @@ describe("VaultAPI", () => {
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/assets/${testAssetAddress}?chainId=${testChainId}`,
+                `/vault/api/public/vaults/${testVaultAddress}/assets/${testAssetAddress}?chainId=${testChainId}`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
+                    headers: {},
                 },
             );
         });
@@ -707,15 +678,13 @@ describe("VaultAPI", () => {
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getWhitelistedAsset(testAccessToken, testVaultAddress, testAssetAddress);
+            const result = await vaultAPI.getWhitelistedAsset(testVaultAddress, testAssetAddress);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/assets/${testAssetAddress}?chainId=1`,
+                `/vault/api/public/vaults/${testVaultAddress}/assets/${testAssetAddress}?chainId=1`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
+                    headers: {},
                 },
             );
         });
@@ -725,7 +694,7 @@ describe("VaultAPI", () => {
             mockHttpClient.get.mockRejectedValue(networkError);
 
             await expect(
-                vaultAPI.getWhitelistedAsset(testAccessToken, testVaultAddress, testAssetAddress, testChainId),
+                vaultAPI.getWhitelistedAsset(testVaultAddress, testAssetAddress, testChainId),
             ).rejects.toThrow(NetworkError);
         });
     });
@@ -975,7 +944,6 @@ describe("VaultAPI", () => {
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
             const result = await vaultAPI.checkAssetWhitelisted(
-                testAccessToken,
                 testVaultAddress,
                 testAssetAddress,
                 testChainId,
@@ -983,11 +951,9 @@ describe("VaultAPI", () => {
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/assets/${testAssetAddress}/check?chainId=${testChainId}`,
+                `/vault/api/public/vaults/${testVaultAddress}/assets/${testAssetAddress}/check?chainId=${testChainId}`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
+                    headers: {},
                 },
             );
         });
@@ -1004,7 +970,6 @@ describe("VaultAPI", () => {
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
             const result = await vaultAPI.checkAssetWhitelisted(
-                testAccessToken,
                 testVaultAddress,
                 testAssetAddress,
                 testChainId,
@@ -1026,18 +991,15 @@ describe("VaultAPI", () => {
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
             const result = await vaultAPI.checkAssetWhitelisted(
-                testAccessToken,
                 testVaultAddress,
                 testAssetAddress,
             );
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/assets/${testAssetAddress}/check?chainId=1`,
+                `/vault/api/public/vaults/${testVaultAddress}/assets/${testAssetAddress}/check?chainId=1`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
+                    headers: {},
                 },
             );
         });
@@ -1047,7 +1009,7 @@ describe("VaultAPI", () => {
             mockHttpClient.get.mockRejectedValue(networkError);
 
             await expect(
-                vaultAPI.checkAssetWhitelisted(testAccessToken, testVaultAddress, testAssetAddress, testChainId),
+                vaultAPI.checkAssetWhitelisted(testVaultAddress, testAssetAddress, testChainId),
             ).rejects.toThrow(NetworkError);
         });
     });

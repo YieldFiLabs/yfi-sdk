@@ -33,29 +33,33 @@ export class VaultAPI {
   /**
    * Build authorization headers
    */
-  private getAuthHeaders(accessToken: string): Record<string, string> {
-    return {
-      Authorization: `Bearer ${accessToken}`,
-    };
+  private getAuthHeaders(accessToken?: string): Record<string, string> {
+    if (accessToken) {
+      return {
+        Authorization: `Bearer ${accessToken}`,
+      };
+    }
+    return {};
   }
 
   // ==================== PROTOCOL STATS ENDPOINTS ====================
 
   /**
    * Get protocol-level statistics
-   * GET /vault/api/vaults/protocol/stats
+   * GET /vault/api/public/vaults/protocol/stats
    *
+   * @param accessToken Optional access token (not required for public endpoint)
    * @returns Protocol statistics (total TVL, max APY, YPO, total fund managers, total users)
    *
    * @example
    * ```typescript
-   * const stats = await sdk.v3.vault.getProtocolStats(accessToken);
+   * const stats = await sdk.v3.vault.getProtocolStats();
    * console.log(`Total TVL: ${stats.stats.totalTvl}`);
    * ```
    */
-  async getProtocolStats(accessToken: string): Promise<ProtocolStatsResponse> {
+  async getProtocolStats(accessToken?: string): Promise<ProtocolStatsResponse> {
     const response = await this.httpClient.get<ProtocolStatsResponse>(
-      `/${this.servicePrefix}/api/vaults/protocol/stats`,
+      `/${this.servicePrefix}/api/public/vaults/protocol/stats`,
       {
         headers: this.getAuthHeaders(accessToken),
       },
@@ -89,15 +93,15 @@ export class VaultAPI {
 
   /**
    * Get vaults with filters and pagination
-   * GET /vault/api/vaults
+   * GET /vault/api/public/vaults
    *
-   * @param accessToken Access token for authentication
    * @param filters Query filters (chainId, status, page, pageSize)
+   * @param accessToken Optional access token (not required for public endpoint)
    * @returns Paginated list of vaults
    *
    * @example
    * ```typescript
-   * const vaults = await sdk.v3.vault.getVaults(accessToken, {
+   * const vaults = await sdk.v3.vault.getVaults({
    *   chainId: 1,
    *   status: 'active',
    *   page: 1,
@@ -105,7 +109,7 @@ export class VaultAPI {
    * });
    * ```
    */
-  async getVaults(accessToken: string, filters?: VaultFilters): Promise<VaultListResponse> {
+  async getVaults(filters?: VaultFilters, accessToken?: string): Promise<VaultListResponse> {
     const queryParams = new URLSearchParams();
     if (filters?.chainId) queryParams.append("chainId", filters.chainId.toString());
     if (filters?.status) queryParams.append("status", filters.status);
@@ -113,7 +117,7 @@ export class VaultAPI {
     if (filters?.pageSize) queryParams.append("pageSize", filters.pageSize.toString());
 
     const queryString = queryParams.toString();
-    const url = `/${this.servicePrefix}/api/vaults${queryString ? `?${queryString}` : ""}`;
+    const url = `/${this.servicePrefix}/api/public/vaults${queryString ? `?${queryString}` : ""}`;
 
     const response = await this.httpClient.get<VaultListResponse>(url, {
       headers: this.getAuthHeaders(accessToken),
@@ -123,35 +127,34 @@ export class VaultAPI {
 
   /**
    * Get vault by address
-   * GET /vault/api/vaults/:address
+   * GET /vault/api/public/vaults/:address
    *
-   * @param accessToken Access token for authentication
    * @param address Vault address
    * @param chainId Chain ID (defaults to 1)
    * @param userAddress User address (required for private vaults)
+   * @param accessToken Optional access token (not required for public endpoint)
    * @returns Vault details
    *
    * @example
    * ```typescript
    * const vault = await sdk.v3.vault.getVaultByAddress(
-   *   accessToken,
    *   '0x5bE91d34FeFbB7554497a74e25dC6df96bFef5DB',
    *   1
    * );
    * ```
    */
   async getVaultByAddress(
-    accessToken: string,
     address: string,
     chainId: number = 1,
     userAddress?: string,
+    accessToken?: string,
   ): Promise<VaultResponse> {
     const queryParams = new URLSearchParams();
     queryParams.append("chainId", chainId.toString());
     if (userAddress) queryParams.append("userAddress", userAddress);
 
     const queryString = queryParams.toString();
-    const url = `/${this.servicePrefix}/api/vaults/${address}${queryString ? `?${queryString}` : ""}`;
+    const url = `/${this.servicePrefix}/api/public/vaults/${address}${queryString ? `?${queryString}` : ""}`;
 
     const response = await this.httpClient.get<VaultResponse>(url, {
       headers: this.getAuthHeaders(accessToken),
@@ -161,31 +164,30 @@ export class VaultAPI {
 
   /**
    * Get vault state
-   * GET /vault/api/vaults/:address/state
+   * GET /vault/api/public/vaults/:address/state
    *
-   * @param accessToken Access token for authentication
    * @param address Vault address
    * @param chainId Chain ID (defaults to 1)
+   * @param accessToken Optional access token (not required for public endpoint)
    * @returns Vault state
    *
    * @example
    * ```typescript
    * const state = await sdk.v3.vault.getVaultState(
-   *   accessToken,
    *   '0x5bE91d34FeFbB7554497a74e25dC6df96bFef5DB',
    *   1
    * );
    * ```
    */
   async getVaultState(
-    accessToken: string,
     address: string,
     chainId: number = 1,
+    accessToken?: string,
   ): Promise<VaultStateResponse> {
     const queryParams = new URLSearchParams();
     queryParams.append("chainId", chainId.toString());
 
-    const url = `/${this.servicePrefix}/api/vaults/${address}/state?${queryParams.toString()}`;
+    const url = `/${this.servicePrefix}/api/public/vaults/${address}/state?${queryParams.toString()}`;
 
     const response = await this.httpClient.get<VaultStateResponse>(url, {
       headers: this.getAuthHeaders(accessToken),
@@ -195,31 +197,30 @@ export class VaultAPI {
 
   /**
    * Get vault details/fact sheet
-   * GET /vault/api/vaults/:address/details
+   * GET /vault/api/public/vaults/:address/details
    *
-   * @param accessToken Access token for authentication
    * @param address Vault address
    * @param chainId Chain ID (defaults to 1)
+   * @param accessToken Optional access token (not required for public endpoint)
    * @returns Vault details/fact sheet
    *
    * @example
    * ```typescript
    * const details = await sdk.v3.vault.getVaultDetails(
-   *   accessToken,
    *   '0x5bE91d34FeFbB7554497a74e25dC6df96bFef5DB',
    *   1
    * );
    * ```
    */
   async getVaultDetails(
-    accessToken: string,
     address: string,
     chainId: number = 1,
+    accessToken?: string,
   ): Promise<VaultDetailsResponse> {
     const queryParams = new URLSearchParams();
     queryParams.append("chainId", chainId.toString());
 
-    const url = `/${this.servicePrefix}/api/vaults/${address}/details?${queryParams.toString()}`;
+    const url = `/${this.servicePrefix}/api/public/vaults/${address}/details?${queryParams.toString()}`;
 
     const response = await this.httpClient.get<VaultDetailsResponse>(url, {
       headers: this.getAuthHeaders(accessToken),
@@ -231,34 +232,33 @@ export class VaultAPI {
 
   /**
    * Get all whitelisted assets for a vault
-   * GET /vault/api/vaults/:address/assets
+   * GET /vault/api/public/vaults/:address/assets
    *
-   * @param accessToken Access token for authentication
    * @param address Vault address
    * @param chainId Chain ID (defaults to 1)
    * @param includeInactive Include inactive assets
+   * @param accessToken Optional access token (not required for public endpoint)
    * @returns List of whitelisted assets
    *
    * @example
    * ```typescript
    * const assets = await sdk.v3.vault.getWhitelistedAssets(
-   *   accessToken,
    *   '0x5bE91d34FeFbB7554497a74e25dC6df96bFef5DB',
    *   1
    * );
    * ```
    */
   async getWhitelistedAssets(
-    accessToken: string,
     address: string,
     chainId: number = 1,
     includeInactive: boolean = false,
+    accessToken?: string,
   ): Promise<WhitelistedAssetsResponse> {
     const queryParams = new URLSearchParams();
     queryParams.append("chainId", chainId.toString());
     if (includeInactive) queryParams.append("includeInactive", "true");
 
-    const url = `/${this.servicePrefix}/api/vaults/${address}/assets?${queryParams.toString()}`;
+    const url = `/${this.servicePrefix}/api/public/vaults/${address}/assets?${queryParams.toString()}`;
 
     const response = await this.httpClient.get<WhitelistedAssetsResponse>(url, {
       headers: this.getAuthHeaders(accessToken),
@@ -268,18 +268,17 @@ export class VaultAPI {
 
   /**
    * Get specific whitelisted asset
-   * GET /vault/api/vaults/:address/assets/:assetAddress
+   * GET /vault/api/public/vaults/:address/assets/:assetAddress
    *
-   * @param accessToken Access token for authentication
    * @param address Vault address
    * @param assetAddress Asset address
    * @param chainId Chain ID (defaults to 1)
+   * @param accessToken Optional access token (not required for public endpoint)
    * @returns Whitelisted asset details
    *
    * @example
    * ```typescript
    * const asset = await sdk.v3.vault.getWhitelistedAsset(
-   *   accessToken,
    *   '0x5bE91d34FeFbB7554497a74e25dC6df96bFef5DB',
    *   '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
    *   1
@@ -287,15 +286,15 @@ export class VaultAPI {
    * ```
    */
   async getWhitelistedAsset(
-    accessToken: string,
     address: string,
     assetAddress: string,
     chainId: number = 1,
+    accessToken?: string,
   ): Promise<WhitelistedAssetResponse> {
     const queryParams = new URLSearchParams();
     queryParams.append("chainId", chainId.toString());
 
-    const url = `/${this.servicePrefix}/api/vaults/${address}/assets/${assetAddress}?${queryParams.toString()}`;
+    const url = `/${this.servicePrefix}/api/public/vaults/${address}/assets/${assetAddress}?${queryParams.toString()}`;
 
     const response = await this.httpClient.get<WhitelistedAssetResponse>(url, {
       headers: this.getAuthHeaders(accessToken),
@@ -391,18 +390,17 @@ export class VaultAPI {
 
   /**
    * Check if asset is whitelisted for a vault
-   * GET /vault/api/vaults/:address/assets/:assetAddress/check
+   * GET /vault/api/public/vaults/:address/assets/:assetAddress/check
    *
-   * @param accessToken Access token for authentication
    * @param address Vault address
    * @param assetAddress Asset address to check
    * @param chainId Chain ID (defaults to 1)
+   * @param accessToken Optional access token (not required for public endpoint)
    * @returns Check result
    *
    * @example
    * ```typescript
    * const result = await sdk.v3.vault.checkAssetWhitelisted(
-   *   accessToken,
    *   '0x5bE91d34FeFbB7554497a74e25dC6df96bFef5DB',
    *   '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
    *   1
@@ -413,15 +411,15 @@ export class VaultAPI {
    * ```
    */
   async checkAssetWhitelisted(
-    accessToken: string,
     address: string,
     assetAddress: string,
     chainId: number = 1,
+    accessToken?: string,
   ): Promise<CheckWhitelistedAssetResponse> {
     const queryParams = new URLSearchParams();
     queryParams.append("chainId", chainId.toString());
 
-    const url = `/${this.servicePrefix}/api/vaults/${address}/assets/${assetAddress}/check?${queryParams.toString()}`;
+    const url = `/${this.servicePrefix}/api/public/vaults/${address}/assets/${assetAddress}/check?${queryParams.toString()}`;
 
     const response = await this.httpClient.get<CheckWhitelistedAssetResponse>(url, {
       headers: this.getAuthHeaders(accessToken),
