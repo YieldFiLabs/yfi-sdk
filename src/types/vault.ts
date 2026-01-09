@@ -24,6 +24,9 @@ export interface VaultListItem {
   status: string;
   tvl: string | null;
   apy: number | null;
+  nativeApy: number | null;
+  additionalApy: number | null;
+  totalApy: number | null;
   baseAsset: string;
   inPartnershipWith: string | null;
   strategyType: string | null;
@@ -65,7 +68,6 @@ export interface VaultFees {
   performanceFee: number;
   chainFees?: Array<{
     chainId: number;
-    targetChainId: number;
     managementFee: number;
     performanceFee: number;
     depositFee: number;
@@ -103,7 +105,14 @@ export interface VaultFaq {
   question: string;
   answer: string;
   displayOrder: number;
-  isActive: boolean;
+}
+
+/**
+ * Vault manager
+ */
+export interface VaultManager {
+  address: string | null;
+  manager: string | null;
 }
 
 /**
@@ -115,8 +124,10 @@ export interface Vault {
   chainId: number;
   symbol: string | null;
   name: string | null;
+  description: string | null;
   status: string;
   baseAsset: VaultBaseAsset;
+  manager: VaultManager;
   supportedAssets: SupportedAsset[];
   metrics: VaultMetrics;
   fees: VaultFees;

@@ -149,6 +149,9 @@ describe("VaultAPI", () => {
                         status: "active",
                         tvl: "1000000000000000000000000",
                         apy: 0.05,
+                        nativeApy: 0.03,
+                        additionalApy: 0.02,
+                        totalApy: 0.05,
                         baseAsset: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
                         inPartnershipWith: null,
                         strategyType: null,
@@ -230,11 +233,16 @@ describe("VaultAPI", () => {
                     chainId: testChainId,
                     symbol: "yUSD",
                     name: "yUSD Vault",
+                    description: "A yield farming vault",
                     status: "active",
                     baseAsset: {
                         address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
                         symbol: "USDC",
                         decimals: 6,
+                    },
+                    manager: {
+                        address: "0x1234567890123456789012345678901234567890",
+                        manager: "YieldFi Manager",
                     },
                     supportedAssets: [],
                     metrics: {
@@ -297,11 +305,16 @@ describe("VaultAPI", () => {
                     chainId: testChainId,
                     symbol: "yUSD",
                     name: "yUSD Vault",
+                    description: "A yield farming vault",
                     status: "active",
                     baseAsset: {
                         address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
                         symbol: "USDC",
                         decimals: 6,
+                    },
+                    manager: {
+                        address: "0x1234567890123456789012345678901234567890",
+                        manager: "YieldFi Manager",
                     },
                     supportedAssets: [],
                     metrics: {
@@ -380,7 +393,6 @@ describe("VaultAPI", () => {
                         question: "What is this vault?",
                         answer: "This vault provides yield farming opportunities...",
                         displayOrder: 1,
-                        isActive: true,
                     },
                 ],
             };
