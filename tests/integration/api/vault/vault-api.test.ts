@@ -29,13 +29,13 @@ describe("VaultAPI Integration Tests", () => {
 
     describe("Protocol Stats", () => {
         describe("getProtocolStats", () => {
-            it.skip("should get protocol statistics", async () => {
+            it("should get protocol statistics", async () => {
                 // TODO: Add integration test
             });
         });
 
         describe("refreshProtocolStats", () => {
-            it.skip("should refresh protocol statistics", async () => {
+            it("should refresh protocol statistics", async () => {
                 // TODO: Add integration test
             });
         });
@@ -45,25 +45,37 @@ describe("VaultAPI Integration Tests", () => {
 
     describe("Vaults", () => {
         describe("getVaults", () => {
-            it.skip("should get vaults", async () => {
+            it("should get vaults", async () => {
                 // TODO: Add integration test
             });
         });
 
-        describe("getVaultByAddress", () => {
-            it.skip("should get vault by address", async () => {
+        describe("getVaultByKey", () => {
+            it("should get vault by key", async () => {
                 // TODO: Add integration test
             });
         });
 
-        describe("getVaultState", () => {
-            it.skip("should get vault state", async () => {
+        describe("getVaultBySymbol", () => {
+            it("should get vault by symbol", async () => {
+                // TODO: Add integration test
+            });
+        });
+
+        describe("getVaultFaqs", () => {
+            it("should get vault FAQs", async () => {
+                // TODO: Add integration test
+            });
+        });
+
+        describe("getStrategies", () => {
+            it("should get distinct strategies", async () => {
                 // TODO: Add integration test
             });
         });
 
         describe("getVaultDetails", () => {
-            it.skip("should get vault details", async () => {
+            it("should get vault details", async () => {
                 // TODO: Add integration test
             });
         });
@@ -73,31 +85,31 @@ describe("VaultAPI Integration Tests", () => {
 
     describe("Whitelisted Assets", () => {
         describe("getWhitelistedAssets", () => {
-            it.skip("should get whitelisted assets", async () => {
+            it("should get whitelisted assets", async () => {
                 // TODO: Add integration test
             });
         });
 
         describe("getWhitelistedAsset", () => {
-            it.skip("should get specific whitelisted asset", async () => {
+            it("should get specific whitelisted asset", async () => {
                 // TODO: Add integration test
             });
         });
 
         describe("addWhitelistedAsset", () => {
-            it.skip("should add whitelisted asset", async () => {
+            it("should add whitelisted asset", async () => {
                 // TODO: Add integration test
             });
         });
 
         describe("removeWhitelistedAsset", () => {
-            it.skip("should remove whitelisted asset", async () => {
+            it("should remove whitelisted asset", async () => {
                 // TODO: Add integration test
             });
         });
 
         describe("checkAssetWhitelisted", () => {
-            it.skip("should check if asset is whitelisted", async () => {
+            it("should check if asset is whitelisted", async () => {
                 // TODO: Add integration test
             });
         });

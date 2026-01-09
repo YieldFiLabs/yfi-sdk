@@ -9,13 +9,14 @@ import { NetworkError } from "../../../../src/errors";
 import {
     VaultListResponse,
     VaultResponse,
-    VaultStateResponse,
     ProtocolStatsResponse,
     VaultDetailsResponse,
     WhitelistedAssetsResponse,
     WhitelistedAssetResponse,
     CheckWhitelistedAssetResponse,
     AddWhitelistedAssetRequest,
+    VaultFaqsResponse,
+    StrategiesResponse,
 } from "../../../../src/types";
 
 jest.mock("../../../../src/http");
@@ -25,6 +26,7 @@ describe("VaultAPI", () => {
     let mockHttpClient: jest.Mocked<HttpClient>;
     let mockConfig: SDKConfig;
 
+    const testVaultKey = "yusd";
     const testVaultAddress = "0x5bE91d34FeFbB7554497a74e25dC6df96bFef5DB";
     const testAssetAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
     const testChainId = 1;
@@ -139,9 +141,11 @@ describe("VaultAPI", () => {
                 success: true,
                 vaults: [
                     {
+                        vaultKey: testVaultKey,
                         address: testVaultAddress,
                         chainId: testChainId,
-                        name: "yETH Vault",
+                        symbol: "yUSD",
+                        name: "yUSD Vault",
                         status: "active",
                         tvl: "1000000000000000000000000",
                         apy: 0.05,
@@ -150,16 +154,9 @@ describe("VaultAPI", () => {
                         strategyType: null,
                         isPrivate: false,
                         depositCap: null,
-                        totalDeposited: "0",
+                        depositRedeemEnabled: 2,
                         startDate: null,
-                        redemptionSla: null,
                         images: null,
-                        nativeApy: null,
-                        additionalApy: null,
-                        rewards1: null,
-                        rewards2: null,
-                        expiryDate: null,
-                        totalApy: null,
                         price: null,
                         priceChange7d: null,
                         createdAt: "2024-01-01T00:00:00.000Z",
@@ -223,48 +220,45 @@ describe("VaultAPI", () => {
         });
     });
 
-    describe("getVaultByAddress", () => {
-        it("should get vault by address without user address", async () => {
+    describe("getVaultByKey", () => {
+        it("should get vault by key", async () => {
             const expectedResponse: VaultResponse = {
                 success: true,
                 vault: {
+                    vaultKey: testVaultKey,
                     address: testVaultAddress,
                     chainId: testChainId,
-                    name: "yETH Vault",
+                    symbol: "yUSD",
+                    name: "yUSD Vault",
                     status: "active",
                     baseAsset: {
                         address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-                        symbol: "ETH",
-                        decimals: 18,
+                        symbol: "USDC",
+                        decimals: 6,
                     },
                     supportedAssets: [],
                     metrics: {
                         tvl: "1000000000000000000000000",
                         apy: 0.05,
+                        apy7d: 0.048,
                         totalDeposits: "1000000000000000000000000",
                         totalWithdrawals: "0",
                     },
                     fees: {
                         managementFee: 0.02,
                         performanceFee: 0.2,
+                        chainFees: [],
                     },
-                    inPartnershipWith: null,
+                    partner: null,
                     strategyType: null,
                     isPrivate: false,
                     depositCap: null,
-                    totalDeposited: "0",
+                    depositRedeemEnabled: 2,
                     startDate: null,
-                    redemptionSla: null,
                     images: null,
-                    apy: 0.05,
-                    nativeApy: null,
-                    additionalApy: null,
-                    rewards1: null,
-                    rewards2: null,
-                    expiryDate: null,
-                    totalApy: null,
                     price: null,
                     priceChange7d: null,
+                    faqs: [],
                     createdAt: "2024-01-01T00:00:00.000Z",
                     updatedAt: "2024-01-01T12:00:00.000Z",
                 },
@@ -272,76 +266,11 @@ describe("VaultAPI", () => {
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getVaultByAddress(testVaultAddress, testChainId);
+            const result = await vaultAPI.getVaultByKey(testVaultKey, testChainId);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/public/vaults/${testVaultAddress}?chainId=${testChainId}`,
-                {
-                    headers: {},
-                },
-            );
-        });
-
-        it("should get vault by address with user address and access token", async () => {
-            const expectedResponse: VaultResponse = {
-                success: true,
-                vault: {
-                    address: testVaultAddress,
-                    chainId: testChainId,
-                    name: "Private Vault",
-                    status: "active",
-                    baseAsset: {
-                        address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-                        symbol: "ETH",
-                        decimals: 18,
-                    },
-                    supportedAssets: [],
-                    metrics: {
-                        tvl: "1000000000000000000000000",
-                        apy: 0.05,
-                        totalDeposits: "1000000000000000000000000",
-                        totalWithdrawals: "0",
-                    },
-                    fees: {
-                        managementFee: 0.02,
-                        performanceFee: 0.2,
-                    },
-                    inPartnershipWith: null,
-                    strategyType: null,
-                    isPrivate: true,
-                    depositCap: null,
-                    totalDeposited: "0",
-                    startDate: null,
-                    redemptionSla: null,
-                    images: null,
-                    apy: 0.05,
-                    nativeApy: null,
-                    additionalApy: null,
-                    rewards1: null,
-                    rewards2: null,
-                    expiryDate: null,
-                    totalApy: null,
-                    price: null,
-                    priceChange7d: null,
-                    createdAt: "2024-01-01T00:00:00.000Z",
-                    updatedAt: "2024-01-01T12:00:00.000Z",
-                },
-            };
-
-            mockHttpClient.get.mockResolvedValue(expectedResponse);
-
-            const userAddress = "0x944416e5df03ee4c14ec44c01495005564e6b07e";
-
-            const result = await vaultAPI.getVaultByAddress(
-                testVaultAddress,
-                testChainId,
-                userAddress,
-            );
-
-            expect(result).toEqual(expectedResponse);
-            expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/public/vaults/${testVaultAddress}?chainId=${testChainId}&userAddress=${userAddress}`,
+                `/vault/api/public/vaults/${testVaultKey}?chainId=${testChainId}`,
                 {
                     headers: {},
                 },
@@ -353,68 +282,116 @@ describe("VaultAPI", () => {
             mockHttpClient.get.mockRejectedValue(networkError);
 
             await expect(
-                vaultAPI.getVaultByAddress(testVaultAddress, testChainId),
+                vaultAPI.getVaultByKey(testVaultKey, testChainId),
             ).rejects.toThrow(NetworkError);
         });
     });
 
-    describe("getVaultState", () => {
-        it("should get vault state", async () => {
-            const expectedResponse: VaultStateResponse = {
+    describe("getVaultBySymbol", () => {
+        it("should get vault by symbol", async () => {
+            const expectedResponse: VaultResponse = {
                 success: true,
-                state: {
+                vault: {
+                    vaultKey: testVaultKey,
                     address: testVaultAddress,
                     chainId: testChainId,
-                    totalAssets: "1000000000000000000000000",
-                    totalSupply: "950000000000000000000000",
-                    pricePerShare: "1052631578947368421",
-                    tvl: "1000000000000000000000000",
-                    apy: 0.05,
-                    lastUpdated: "2024-01-01T12:00:00.000Z",
-                    blockNumber: "18500000",
-                    transactionHash:
-                        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                    symbol: "yUSD",
+                    name: "yUSD Vault",
+                    status: "active",
+                    baseAsset: {
+                        address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                        symbol: "USDC",
+                        decimals: 6,
+                    },
+                    supportedAssets: [],
+                    metrics: {
+                        tvl: "1000000000000000000000000",
+                        apy: 0.05,
+                        apy7d: 0.048,
+                        totalDeposits: "1000000000000000000000000",
+                        totalWithdrawals: "0",
+                    },
+                    fees: {
+                        managementFee: 0.02,
+                        performanceFee: 0.2,
+                        chainFees: [],
+                    },
+                    partner: null,
+                    strategyType: null,
+                    isPrivate: false,
+                    depositCap: null,
+                    depositRedeemEnabled: 2,
+                    startDate: null,
+                    images: null,
+                    price: null,
+                    priceChange7d: null,
+                    faqs: [],
+                    createdAt: "2024-01-01T00:00:00.000Z",
+                    updatedAt: "2024-01-01T12:00:00.000Z",
                 },
             };
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getVaultState(testVaultAddress, testChainId);
+            const result = await vaultAPI.getVaultBySymbol("yUSD", testChainId);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/public/vaults/${testVaultAddress}/state?chainId=${testChainId}`,
+                `/vault/api/public/vaults/by-symbol/yUSD?chainId=${testChainId}`,
                 {
                     headers: {},
                 },
             );
         });
+    });
 
-        it("should use default chainId if not provided", async () => {
-            const expectedResponse: VaultStateResponse = {
+    describe("getStrategies", () => {
+        it("should get distinct strategies", async () => {
+            const expectedResponse: StrategiesResponse = {
                 success: true,
-                state: {
-                    address: testVaultAddress,
-                    chainId: 1,
-                    totalAssets: "1000000000000000000000000",
-                    totalSupply: "950000000000000000000000",
-                    pricePerShare: "1052631578947368421",
-                    tvl: "1000000000000000000000000",
-                    apy: 0.05,
-                    lastUpdated: "2024-01-01T12:00:00.000Z",
-                    blockNumber: "18500000",
-                    transactionHash:
-                        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-                },
+                strategies: ["yield-farming", "liquidity-provision", "lending"],
             };
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getVaultState(testVaultAddress);
+            const result = await vaultAPI.getStrategies();
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.get).toHaveBeenCalledWith("/vault/api/public/vaults/strategies", {
+                headers: {},
+            });
+        });
+
+        it("should throw NetworkError on failure", async () => {
+            const networkError = new NetworkError("Network error");
+            mockHttpClient.get.mockRejectedValue(networkError);
+
+            await expect(vaultAPI.getStrategies()).rejects.toThrow(NetworkError);
+        });
+    });
+
+    describe("getVaultFaqs", () => {
+        it("should get vault FAQs", async () => {
+            const expectedResponse: VaultFaqsResponse = {
+                success: true,
+                faqs: [
+                    {
+                        id: "1",
+                        question: "What is this vault?",
+                        answer: "This vault provides yield farming opportunities...",
+                        displayOrder: 1,
+                        isActive: true,
+                    },
+                ],
+            };
+
+            mockHttpClient.get.mockResolvedValue(expectedResponse);
+
+            const result = await vaultAPI.getVaultFaqs(testVaultKey, testChainId);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/public/vaults/${testVaultAddress}/state?chainId=1`,
+                `/vault/api/public/vaults/${testVaultKey}/faqs?chainId=${testChainId}`,
                 {
                     headers: {},
                 },
@@ -425,7 +402,7 @@ describe("VaultAPI", () => {
             const networkError = new NetworkError("Network error");
             mockHttpClient.get.mockRejectedValue(networkError);
 
-            await expect(vaultAPI.getVaultState(testVaultAddress, testChainId)).rejects.toThrow(
+            await expect(vaultAPI.getVaultFaqs(testVaultKey, testChainId)).rejects.toThrow(
                 NetworkError,
             );
         });
@@ -439,10 +416,52 @@ describe("VaultAPI", () => {
                     vaultAddress: testVaultAddress,
                     chainId: testChainId,
                     strategy: "Yield farming on Uniswap V3",
-                    manager: "YieldFi Fund Management",
-                    yieldType: "DeFi Yield",
                     priceUpdateFrequency: "hourly",
-                    rewards: "Additional rewards from protocol tokens",
+                    redemptionSla: 24,
+                    redemptionCapacity: "1000000000000000000000000",
+                    transferability: true,
+                    custody: "Non-custodial",
+                    eligibility: "Open to all users",
+                    legalTerms: "Standard terms",
+                    risks: "Smart contract risk",
+                    feeStructure: "2% management fee, 20% performance fee",
+                    audits: [],
+                    updatedAt: "2024-01-01T12:00:00.000Z",
+                },
+            };
+
+            mockHttpClient.get.mockResolvedValue(expectedResponse);
+
+            const result = await vaultAPI.getVaultDetails(testVaultKey, testChainId);
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.get).toHaveBeenCalledWith(
+                `/vault/api/public/vaults/${testVaultKey}/details?chainId=${testChainId}`,
+                {
+                    headers: {},
+                },
+            );
+        });
+
+        it("should throw NetworkError on failure", async () => {
+            const networkError = new NetworkError("Network error");
+            mockHttpClient.get.mockRejectedValue(networkError);
+
+            await expect(vaultAPI.getVaultDetails(testVaultKey, testChainId)).rejects.toThrow(
+                NetworkError,
+            );
+        });
+    });
+
+    describe("getVaultDetails", () => {
+        it("should get vault details", async () => {
+            const expectedResponse: VaultDetailsResponse = {
+                success: true,
+                details: {
+                    vaultAddress: testVaultAddress,
+                    chainId: testChainId,
+                    strategy: "Yield farming on Uniswap V3",
+                    priceUpdateFrequency: "hourly",
                     redemptionSla: 24,
                     redemptionCapacity: "1000000000000000000000000",
                     transferability: true,
@@ -458,20 +477,17 @@ describe("VaultAPI", () => {
                             date: "2024-01-01",
                         },
                     ],
-                    depositChains: [1, 137, 8453],
-                    withdrawChains: [1, 137, 8453],
-                    contractAddress: testVaultAddress,
                     updatedAt: "2024-01-01T12:00:00.000Z",
                 },
             };
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getVaultDetails(testVaultAddress, testChainId);
+            const result = await vaultAPI.getVaultDetails(testVaultKey, testChainId);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/public/vaults/${testVaultAddress}/details?chainId=${testChainId}`,
+                `/vault/api/public/vaults/${testVaultKey}/details?chainId=${testChainId}`,
                 {
                     headers: {},
                 },
@@ -485,10 +501,7 @@ describe("VaultAPI", () => {
                     vaultAddress: testVaultAddress,
                     chainId: 1,
                     strategy: "Yield farming on Uniswap V3",
-                    manager: "YieldFi Fund Management",
-                    yieldType: "DeFi Yield",
                     priceUpdateFrequency: "hourly",
-                    rewards: "Additional rewards from protocol tokens",
                     redemptionSla: 24,
                     redemptionCapacity: "1000000000000000000000000",
                     transferability: true,
@@ -498,20 +511,17 @@ describe("VaultAPI", () => {
                     risks: "Smart contract risk, impermanent loss",
                     feeStructure: "2% management fee, 20% performance fee",
                     audits: [],
-                    depositChains: [1],
-                    withdrawChains: [1],
-                    contractAddress: testVaultAddress,
                     updatedAt: "2024-01-01T12:00:00.000Z",
                 },
             };
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getVaultDetails(testVaultAddress);
+            const result = await vaultAPI.getVaultDetails(testVaultKey, 1);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/public/vaults/${testVaultAddress}/details?chainId=1`,
+                `/vault/api/public/vaults/${testVaultKey}/details?chainId=1`,
                 {
                     headers: {},
                 },
@@ -534,8 +544,7 @@ describe("VaultAPI", () => {
         it("should get whitelisted assets", async () => {
             const expectedResponse: WhitelistedAssetsResponse = {
                 success: true,
-                vaultAddress: testVaultAddress,
-                chainId: testChainId,
+                vaultKey: testVaultKey,
                 assets: [
                     {
                         id: "1",
@@ -543,6 +552,7 @@ describe("VaultAPI", () => {
                         assetSymbol: "USDC",
                         assetName: "USD Coin",
                         assetDecimals: 6,
+                        depositRedeemEnabled: 2,
                         isActive: true,
                         addedAt: "2024-01-01T00:00:00.000Z",
                         updatedAt: "2024-01-01T00:00:00.000Z",
@@ -553,11 +563,11 @@ describe("VaultAPI", () => {
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.getWhitelistedAssets(testVaultAddress, testChainId);
+            const result = await vaultAPI.getWhitelistedAssets(testVaultKey, testChainId);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/public/vaults/${testVaultAddress}/assets?chainId=${testChainId}`,
+                `/vault/api/public/vaults/${testVaultKey}/assets?chainId=${testChainId}`,
                 {
                     headers: {},
                 },
@@ -567,8 +577,7 @@ describe("VaultAPI", () => {
         it("should get whitelisted assets including inactive", async () => {
             const expectedResponse: WhitelistedAssetsResponse = {
                 success: true,
-                vaultAddress: testVaultAddress,
-                chainId: testChainId,
+                vaultKey: testVaultKey,
                 assets: [],
                 count: 0,
             };
@@ -576,36 +585,14 @@ describe("VaultAPI", () => {
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
             const result = await vaultAPI.getWhitelistedAssets(
-                testVaultAddress,
+                testVaultKey,
                 testChainId,
                 true,
             );
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/public/vaults/${testVaultAddress}/assets?chainId=${testChainId}&includeInactive=true`,
-                {
-                    headers: {},
-                },
-            );
-        });
-
-        it("should use default chainId if not provided", async () => {
-            const expectedResponse: WhitelistedAssetsResponse = {
-                success: true,
-                vaultAddress: testVaultAddress,
-                chainId: 1,
-                assets: [],
-                count: 0,
-            };
-
-            mockHttpClient.get.mockResolvedValue(expectedResponse);
-
-            const result = await vaultAPI.getWhitelistedAssets(testVaultAddress);
-
-            expect(result).toEqual(expectedResponse);
-            expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/public/vaults/${testVaultAddress}/assets?chainId=1`,
+                `/vault/api/public/vaults/${testVaultKey}/assets?chainId=${testChainId}&includeInactive=true`,
                 {
                     headers: {},
                 },
@@ -617,7 +604,7 @@ describe("VaultAPI", () => {
             mockHttpClient.get.mockRejectedValue(networkError);
 
             await expect(
-                vaultAPI.getWhitelistedAssets(testVaultAddress, testChainId),
+                vaultAPI.getWhitelistedAssets(testVaultKey, testChainId),
             ).rejects.toThrow(NetworkError);
         });
     });
@@ -634,6 +621,7 @@ describe("VaultAPI", () => {
                     assetSymbol: "USDC",
                     assetName: "USD Coin",
                     assetDecimals: 6,
+                    depositRedeemEnabled: 2,
                     isActive: true,
                     addedAt: "2024-01-01T00:00:00.000Z",
                     addedBy: "0x944416e5df03ee4c14ec44c01495005564e6b07e",
@@ -644,45 +632,14 @@ describe("VaultAPI", () => {
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
             const result = await vaultAPI.getWhitelistedAsset(
-                testVaultAddress,
+                testVaultKey,
                 testAssetAddress,
                 testChainId,
             );
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/public/vaults/${testVaultAddress}/assets/${testAssetAddress}?chainId=${testChainId}`,
-                {
-                    headers: {},
-                },
-            );
-        });
-
-        it("should use default chainId if not provided", async () => {
-            const expectedResponse: WhitelistedAssetResponse = {
-                success: true,
-                asset: {
-                    id: "1",
-                    vaultAddress: testVaultAddress,
-                    chainId: 1,
-                    assetAddress: testAssetAddress,
-                    assetSymbol: "USDC",
-                    assetName: "USD Coin",
-                    assetDecimals: 6,
-                    isActive: true,
-                    addedAt: "2024-01-01T00:00:00.000Z",
-                    addedBy: null,
-                    updatedAt: "2024-01-01T00:00:00.000Z",
-                },
-            };
-
-            mockHttpClient.get.mockResolvedValue(expectedResponse);
-
-            const result = await vaultAPI.getWhitelistedAsset(testVaultAddress, testAssetAddress);
-
-            expect(result).toEqual(expectedResponse);
-            expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/public/vaults/${testVaultAddress}/assets/${testAssetAddress}?chainId=1`,
+                `/vault/api/public/vaults/${testVaultKey}/assets/${testAssetAddress}?chainId=${testChainId}`,
                 {
                     headers: {},
                 },
@@ -694,7 +651,7 @@ describe("VaultAPI", () => {
             mockHttpClient.get.mockRejectedValue(networkError);
 
             await expect(
-                vaultAPI.getWhitelistedAsset(testVaultAddress, testAssetAddress, testChainId),
+                vaultAPI.getWhitelistedAsset(testVaultKey, testAssetAddress, testChainId),
             ).rejects.toThrow(NetworkError);
         });
     });
@@ -719,6 +676,7 @@ describe("VaultAPI", () => {
                     assetSymbol: "USDC",
                     assetName: "USD Coin",
                     assetDecimals: 6,
+                    depositRedeemEnabled: 2,
                     isActive: true,
                     addedAt: "2024-01-01T00:00:00.000Z",
                     addedBy: "0x944416e5df03ee4c14ec44c01495005564e6b07e",
@@ -730,14 +688,14 @@ describe("VaultAPI", () => {
 
             const result = await vaultAPI.addWhitelistedAsset(
                 testAccessToken,
-                testVaultAddress,
+                testVaultKey,
                 assetRequest,
                 testChainId,
             );
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.post).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/assets?chainId=${testChainId}`,
+                `/vault/api/vaults/${testVaultKey}/assets?chainId=${testChainId}`,
                 assetRequest,
                 {
                     headers: {
@@ -762,6 +720,7 @@ describe("VaultAPI", () => {
                     assetSymbol: null,
                     assetName: null,
                     assetDecimals: 18,
+                    depositRedeemEnabled: 2,
                     isActive: true,
                     addedAt: "2024-01-01T00:00:00.000Z",
                     addedBy: null,
@@ -773,14 +732,14 @@ describe("VaultAPI", () => {
 
             const result = await vaultAPI.addWhitelistedAsset(
                 testAccessToken,
-                testVaultAddress,
+                testVaultKey,
                 assetRequest,
                 testChainId,
             );
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.post).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/assets?chainId=${testChainId}`,
+                `/vault/api/vaults/${testVaultKey}/assets?chainId=${testChainId}`,
                 assetRequest,
                 {
                     headers: {
@@ -805,6 +764,7 @@ describe("VaultAPI", () => {
                     assetSymbol: null,
                     assetName: null,
                     assetDecimals: 18,
+                    depositRedeemEnabled: 2,
                     isActive: true,
                     addedAt: "2024-01-01T00:00:00.000Z",
                     addedBy: null,
@@ -814,11 +774,11 @@ describe("VaultAPI", () => {
 
             mockHttpClient.post.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.addWhitelistedAsset(testAccessToken, testVaultAddress, assetRequest);
+            const result = await vaultAPI.addWhitelistedAsset(testAccessToken, testVaultKey, assetRequest, 1);
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.post).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/assets?chainId=1`,
+                `/vault/api/vaults/${testVaultKey}/assets?chainId=1`,
                 assetRequest,
                 {
                     headers: {
@@ -835,7 +795,7 @@ describe("VaultAPI", () => {
             await expect(
                 vaultAPI.addWhitelistedAsset(
                     testAccessToken,
-                    testVaultAddress,
+                    testVaultKey,
                     { assetAddress: testAssetAddress },
                     testChainId,
                 ),
@@ -854,14 +814,14 @@ describe("VaultAPI", () => {
 
             const result = await vaultAPI.removeWhitelistedAsset(
                 testAccessToken,
-                testVaultAddress,
+                testVaultKey,
                 testAssetAddress,
                 testChainId,
             );
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.delete).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/assets/${testAssetAddress}?chainId=${testChainId}`,
+                `/vault/api/vaults/${testVaultKey}/assets/${testAssetAddress}?chainId=${testChainId}`,
                 {
                     headers: {
                         Authorization: `Bearer ${testAccessToken}`,
@@ -880,39 +840,14 @@ describe("VaultAPI", () => {
 
             const result = await vaultAPI.removeWhitelistedAsset(
                 testAccessToken,
-                testVaultAddress,
+                testVaultKey,
                 testAssetAddress,
                 testChainId,
             );
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.delete).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/assets/${testAssetAddress}?chainId=${testChainId}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
-                },
-            );
-        });
-
-        it("should use default chainId if not provided", async () => {
-            const expectedResponse = {
-                success: true,
-                message: "Asset removed from whitelist successfully",
-            };
-
-            mockHttpClient.delete.mockResolvedValue(expectedResponse);
-
-            const result = await vaultAPI.removeWhitelistedAsset(
-                testAccessToken,
-                testVaultAddress,
-                testAssetAddress,
-            );
-
-            expect(result).toEqual(expectedResponse);
-            expect(mockHttpClient.delete).toHaveBeenCalledWith(
-                `/vault/api/vaults/${testVaultAddress}/assets/${testAssetAddress}?chainId=1`,
+                `/vault/api/vaults/${testVaultKey}/assets/${testAssetAddress}?chainId=${testChainId}`,
                 {
                     headers: {
                         Authorization: `Bearer ${testAccessToken}`,
@@ -926,7 +861,7 @@ describe("VaultAPI", () => {
             mockHttpClient.delete.mockRejectedValue(networkError);
 
             await expect(
-                vaultAPI.removeWhitelistedAsset(testAccessToken, testVaultAddress, testAssetAddress, testChainId),
+                vaultAPI.removeWhitelistedAsset(testAccessToken, testVaultKey, testAssetAddress, testChainId),
             ).rejects.toThrow(NetworkError);
         });
     });
@@ -935,23 +870,22 @@ describe("VaultAPI", () => {
         it("should check if asset is whitelisted", async () => {
             const expectedResponse: CheckWhitelistedAssetResponse = {
                 success: true,
-                vaultAddress: testVaultAddress,
+                vaultKey: testVaultKey,
                 assetAddress: testAssetAddress,
-                chainId: testChainId,
                 isWhitelisted: true,
             };
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
             const result = await vaultAPI.checkAssetWhitelisted(
-                testVaultAddress,
+                testVaultKey,
                 testAssetAddress,
                 testChainId,
             );
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/public/vaults/${testVaultAddress}/assets/${testAssetAddress}/check?chainId=${testChainId}`,
+                `/vault/api/public/vaults/${testVaultKey}/assets/${testAssetAddress}/check?chainId=${testChainId}`,
                 {
                     headers: {},
                 },
@@ -961,16 +895,15 @@ describe("VaultAPI", () => {
         it("should return false if asset is not whitelisted", async () => {
             const expectedResponse: CheckWhitelistedAssetResponse = {
                 success: true,
-                vaultAddress: testVaultAddress,
+                vaultKey: testVaultKey,
                 assetAddress: testAssetAddress,
-                chainId: testChainId,
                 isWhitelisted: false,
             };
 
             mockHttpClient.get.mockResolvedValue(expectedResponse);
 
             const result = await vaultAPI.checkAssetWhitelisted(
-                testVaultAddress,
+                testVaultKey,
                 testAssetAddress,
                 testChainId,
             );
@@ -979,37 +912,12 @@ describe("VaultAPI", () => {
             expect(result.isWhitelisted).toBe(false);
         });
 
-        it("should use default chainId if not provided", async () => {
-            const expectedResponse: CheckWhitelistedAssetResponse = {
-                success: true,
-                vaultAddress: testVaultAddress,
-                assetAddress: testAssetAddress,
-                chainId: 1,
-                isWhitelisted: true,
-            };
-
-            mockHttpClient.get.mockResolvedValue(expectedResponse);
-
-            const result = await vaultAPI.checkAssetWhitelisted(
-                testVaultAddress,
-                testAssetAddress,
-            );
-
-            expect(result).toEqual(expectedResponse);
-            expect(mockHttpClient.get).toHaveBeenCalledWith(
-                `/vault/api/public/vaults/${testVaultAddress}/assets/${testAssetAddress}/check?chainId=1`,
-                {
-                    headers: {},
-                },
-            );
-        });
-
         it("should throw NetworkError on failure", async () => {
             const networkError = new NetworkError("Network error");
             mockHttpClient.get.mockRejectedValue(networkError);
 
             await expect(
-                vaultAPI.checkAssetWhitelisted(testVaultAddress, testAssetAddress, testChainId),
+                vaultAPI.checkAssetWhitelisted(testVaultKey, testAssetAddress, testChainId),
             ).rejects.toThrow(NetworkError);
         });
     });

@@ -16,8 +16,10 @@ export interface VaultFilters extends PaginationParams {
  * Vault list item
  */
 export interface VaultListItem {
+  vaultKey: string;
   address: string;
   chainId: number;
+  symbol: string | null;
   name: string | null;
   status: string;
   tvl: string | null;
@@ -27,16 +29,9 @@ export interface VaultListItem {
   strategyType: string | null;
   isPrivate: boolean;
   depositCap: string | null;
-  totalDeposited: string;
+  depositRedeemEnabled: number; // 0 = none, 1 = deposit, 2 = both
   startDate: string | null;
-  redemptionSla: number | null;
   images: string[] | null;
-  nativeApy: number | null;
-  additionalApy: number | null;
-  rewards1: string | null;
-  rewards2: string | null;
-  expiryDate: string | null;
-  totalApy: number | null;
   price: string | null;
   priceChange7d: number | null;
   createdAt: string;
@@ -57,6 +52,7 @@ export interface VaultBaseAsset {
 export interface VaultMetrics {
   tvl: string;
   apy: number | null;
+  apy7d: number | null;
   totalDeposits: string;
   totalWithdrawals: string;
 }
@@ -67,6 +63,14 @@ export interface VaultMetrics {
 export interface VaultFees {
   managementFee: number;
   performanceFee: number;
+  chainFees?: Array<{
+    chainId: number;
+    targetChainId: number;
+    managementFee: number;
+    performanceFee: number;
+    depositFee: number;
+    withdrawFee: number;
+  }>;
 }
 
 /**
@@ -77,56 +81,59 @@ export interface SupportedAsset {
   symbol: string | null;
   name: string | null;
   decimals: number;
+  depositRedeemEnabled: number; // 0 = none, 1 = deposit, 2 = both
+}
+
+/**
+ * Vault partner/curator
+ */
+export interface VaultPartner {
+  key: string;
+  name: string | null;
+  address: string | null;
+  websiteUrl: string | null;
+  contractAddress: string | null;
+}
+
+/**
+ * Vault FAQ
+ */
+export interface VaultFaq {
+  id: string;
+  question: string;
+  answer: string;
+  displayOrder: number;
+  isActive: boolean;
 }
 
 /**
  * Vault details
  */
 export interface Vault {
+  vaultKey: string;
   address: string;
   chainId: number;
+  symbol: string | null;
   name: string | null;
   status: string;
   baseAsset: VaultBaseAsset;
   supportedAssets: SupportedAsset[];
   metrics: VaultMetrics;
   fees: VaultFees;
-  inPartnershipWith: string | null;
+  partner: VaultPartner | null;
   strategyType: string | null;
   isPrivate: boolean;
   depositCap: string | null;
-  totalDeposited: string;
+  depositRedeemEnabled: number; // 0 = none, 1 = deposit, 2 = both
   startDate: string | null;
-  redemptionSla: number | null;
   images: string[] | null;
-  apy: number | null;
-  nativeApy: number | null;
-  additionalApy: number | null;
-  rewards1: string | null;
-  rewards2: string | null;
-  expiryDate: string | null;
-  totalApy: number | null;
   price: string | null;
   priceChange7d: number | null;
+  faqs: VaultFaq[];
   createdAt: string;
   updatedAt: string;
 }
 
-/**
- * Vault state
- */
-export interface VaultState {
-  address: string;
-  chainId: number;
-  totalAssets: string;
-  totalSupply: string;
-  pricePerShare: string;
-  tvl: string;
-  apy: number;
-  lastUpdated: string;
-  blockNumber: string;
-  transactionHash: string;
-}
 
 /**
  * Protocol statistics
@@ -147,10 +154,7 @@ export interface VaultDetails {
   vaultAddress: string;
   chainId: number;
   strategy: string | null;
-  manager: string | null;
-  yieldType: string | null;
   priceUpdateFrequency: string | null;
-  rewards: string | null;
   redemptionSla: number | null;
   redemptionCapacity: string | null;
   transferability: boolean;
@@ -160,9 +164,6 @@ export interface VaultDetails {
   risks: string | null;
   feeStructure: string | null;
   audits: any[] | null;
-  depositChains: number[];
-  withdrawChains: number[];
-  contractAddress: string | null;
   updatedAt: string;
 }
 
@@ -175,6 +176,7 @@ export interface WhitelistedAsset {
   assetSymbol: string | null;
   assetName: string | null;
   assetDecimals: number;
+  depositRedeemEnabled: number; // 0 = none, 1 = deposit, 2 = both
   isActive: boolean;
   addedAt: string;
   updatedAt: string;
@@ -188,6 +190,7 @@ export interface AddWhitelistedAssetRequest {
   assetSymbol?: string;
   assetName?: string;
   assetDecimals?: number;
+  depositRedeemEnabled?: number; // 0 = none, 1 = deposit, 2 = both
   addedBy?: string;
 }
 
@@ -214,11 +217,19 @@ export interface VaultResponse {
 }
 
 /**
- * Vault state response
+ * Vault FAQs response
  */
-export interface VaultStateResponse {
+export interface VaultFaqsResponse {
   success: boolean;
-  state: VaultState;
+  faqs: VaultFaq[];
+}
+
+/**
+ * Strategies response
+ */
+export interface StrategiesResponse {
+  success: boolean;
+  strategies: string[];
 }
 
 /**
@@ -242,8 +253,7 @@ export interface VaultDetailsResponse {
  */
 export interface WhitelistedAssetsResponse {
   success: boolean;
-  vaultAddress: string;
-  chainId: number;
+  vaultKey: string;
   assets: WhitelistedAsset[];
   count: number;
 }
@@ -265,9 +275,8 @@ export interface WhitelistedAssetResponse {
  */
 export interface CheckWhitelistedAssetResponse {
   success: boolean;
-  vaultAddress: string;
+  vaultKey: string;
   assetAddress: string;
-  chainId: number;
   isWhitelisted: boolean;
 }
 
