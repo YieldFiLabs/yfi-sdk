@@ -1,6 +1,6 @@
 {
   "name": "@yieldfi/yieldfi-sdk",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Official YieldFi SDK for interacting with YieldFi services and blockchain protocols",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -13,6 +13,17 @@ export interface VaultFilters extends PaginationParams {
 }
 
 /**
+ * Vault reward detail
+ */
+export interface VaultRewardDetail {
+  rewardDescription: string;
+  validityStart: string | null;
+  validityEnd: string | null;
+  durationDays: number | null;
+  rewardLink: string | null;
+}
+
+/**
  * Vault list item
  */
 export interface VaultListItem {
@@ -38,6 +49,20 @@ export interface VaultListItem {
   price: string | null;
   priceChange7d: number | null;
   createdAt: string;
+  // Details from details table
+  strategy: string | null;
+  priceUpdateFrequency: string | null;
+  redemptionSla: number | null;
+  redemptionCapacity: string | null;
+  transferability: boolean | null;
+  custody: string | null;
+  eligibility: string | null;
+  legalTerms: string | null;
+  risks: string | null;
+  feeStructure: string | null;
+  audits: any[] | null;
+  // Rewards from rewards_details table
+  rewards: VaultRewardDetail[];
 }
 
 /**

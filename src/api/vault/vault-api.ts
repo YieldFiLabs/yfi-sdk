@@ -210,6 +210,50 @@ export class VaultAPI {
   }
 
   /**
+   * Get private vault by key (authenticated endpoint)
+   * GET /vault/api/vaults/:key
+   *
+   * Requires x-user-address and x-user-role headers for authentication.
+   * This endpoint is used to access private vaults that require whitelisting.
+   *
+   * @param vaultKey Vault key (e.g., 'yusd', 'ybtc')
+   * @param userAddress User's wallet address (required for authentication)
+   * @param userRole User's role (e.g., 'user', 'admin') (required for authentication)
+   * @param chainId Chain ID (defaults to 1)
+   * @param accessToken Optional access token
+   * @returns Vault details
+   *
+   * @example
+   * ```typescript
+   * const vault = await sdk.vault.getPrivateVaultByKey(
+   *   'private-vault-key',
+   *   '0x1234567890123456789012345678901234567890',
+   *   'user',
+   *   1
+   * );
+   * ```
+   */
+  async getPrivateVaultByKey(
+    vaultKey: string,
+    userAddress: string,
+    userRole: string,
+    chainId: number = 1,
+    accessToken?: string,
+  ): Promise<VaultResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append("chainId", chainId.toString());
+
+    const url = `/${this.servicePrefix}/api/vaults/${vaultKey}?${queryParams.toString()}`;
+
+    const headers = this.getAuthHeaders(accessToken);
+
+    const response = await this.httpClient.get<VaultResponse>(url, {
+      headers,
+    });
+    return response;
+  }
+
+  /**
    * Get vault details/fact sheet
    * GET /vault/api/public/vaults/:key/details
    *
