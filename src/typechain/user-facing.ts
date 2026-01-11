@@ -27,6 +27,7 @@
  */
 
 import type { Manager, YToken, VyToken } from "./contracts";
+import type { ManagerV3, VaultContract } from "./contracts/v3";
 import { Contract, type ContractRunner, type InterfaceAbi } from "ethers";
 
 /**
@@ -78,4 +79,38 @@ export function connectVyToken(
   runner: ContractRunner,
 ): VyToken {
   return new Contract(address, abi, runner) as unknown as VyToken;
+}
+
+/**
+ * Connect to Manager contract (v3)
+ * Note: You must provide the Manager v3 ABI from your contract compilation
+ *
+ * @param address Contract address
+ * @param abi Contract ABI array
+ * @param runner Provider or Signer
+ * @returns Manager v3 contract instance with full typing
+ */
+export function connectManagerV3(
+  address: string,
+  abi: InterfaceAbi,
+  runner: ContractRunner,
+): ManagerV3 {
+  return new Contract(address, abi, runner) as unknown as ManagerV3;
+}
+
+/**
+ * Connect to Vault contract (v3)
+ * Note: You must provide the Vault ABI from your contract compilation
+ *
+ * @param address Contract address
+ * @param abi Contract ABI array
+ * @param runner Provider or Signer
+ * @returns Vault contract instance with full typing
+ */
+export function connectVault(
+  address: string,
+  abi: InterfaceAbi,
+  runner: ContractRunner,
+): VaultContract {
+  return new Contract(address, abi, runner) as unknown as VaultContract;
 }

@@ -4,7 +4,7 @@
  */
 
 /**
- * Supported blockchain networks
+ * Supported blockchain networks (Mainnet)
  */
 export enum Chain {
   ETHEREUM = "ethereum",
@@ -20,7 +20,19 @@ export enum Chain {
 }
 
 /**
- * Chain IDs for each supported network
+ * Supported blockchain testnet networks
+ */
+export enum TestnetChain {
+  ETHEREUM_SEPOLIA = "ethereum-sepolia",
+  ARBITRUM_SEPOLIA = "arbitrum-sepolia",
+  BASE_SEPOLIA = "base-sepolia",
+  OPTIMISM_SEPOLIA = "optimism-sepolia",
+  BNB_TESTNET = "bnb-testnet",
+  AVALANCHE_FUJI = "avalanche-fuji",
+}
+
+/**
+ * Chain IDs for each supported mainnet network
  */
 export const CHAIN_IDS: Record<Chain, string> = {
   [Chain.ETHEREUM]: "1",
@@ -33,6 +45,18 @@ export const CHAIN_IDS: Record<Chain, string> = {
   [Chain.BNB]: "56",
   [Chain.AVALANCHE]: "43114",
   [Chain.TAC]: "239",
+};
+
+/**
+ * Chain IDs for each supported testnet network
+ */
+export const TESTNET_CHAIN_IDS: Record<TestnetChain, string> = {
+  [TestnetChain.ETHEREUM_SEPOLIA]: "11155111",
+  [TestnetChain.ARBITRUM_SEPOLIA]: "421614",
+  [TestnetChain.BASE_SEPOLIA]: "84532",
+  [TestnetChain.OPTIMISM_SEPOLIA]: "11155420",
+  [TestnetChain.BNB_TESTNET]: "97",
+  [TestnetChain.AVALANCHE_FUJI]: "43113",
 };
 
 /**
@@ -76,7 +100,7 @@ export interface ChainContracts {
 }
 
 /**
- * Contract addresses per chain
+ * Contract addresses per mainnet chain
  *
  * Source: https://docs.yield.fi/resources/contract-addresses
  *
@@ -142,7 +166,36 @@ export const CONTRACT_ADDRESSES: Record<Chain, ChainContracts> = {
 };
 
 /**
- * Get contract addresses for a specific chain
+ * Contract addresses per testnet chain
+ *
+ * Source: Testnet deployments
+ *
+ * Note: These addresses need to be populated with actual testnet deployment addresses.
+ * Update these when testnet contracts are deployed.
+ */
+export const TESTNET_CONTRACT_ADDRESSES: Record<TestnetChain, ChainContracts> = {
+  [TestnetChain.ETHEREUM_SEPOLIA]: {
+    // TODO: Add testnet contract addresses when deployed
+  },
+  [TestnetChain.ARBITRUM_SEPOLIA]: {
+    // TODO: Add testnet contract addresses when deployed
+  },
+  [TestnetChain.BASE_SEPOLIA]: {
+    // TODO: Add testnet contract addresses when deployed
+  },
+  [TestnetChain.OPTIMISM_SEPOLIA]: {
+    // TODO: Add testnet contract addresses when deployed
+  },
+  [TestnetChain.BNB_TESTNET]: {
+    // TODO: Add testnet contract addresses when deployed
+  },
+  [TestnetChain.AVALANCHE_FUJI]: {
+    // TODO: Add testnet contract addresses when deployed
+  },
+};
+
+/**
+ * Get contract addresses for a specific mainnet chain
  * @param chain The blockchain network
  * @returns Contract addresses for the specified chain
  *
@@ -159,7 +212,26 @@ export function getContractAddresses(chain: Chain): ChainContracts {
 }
 
 /**
- * Get a specific contract address for a chain
+ * Get contract addresses for a specific testnet chain
+ * @param chain The testnet blockchain network
+ * @returns Contract addresses for the specified testnet chain
+ *
+ * @example
+ * ```typescript
+ * import { getTestnetContractAddresses, TestnetChain } from 'yieldfi-sdk';
+ *
+ * const addresses = getTestnetContractAddresses(TestnetChain.ETHEREUM_SEPOLIA);
+ * console.log(addresses.yUSD); // yUSD contract address on Ethereum Sepolia
+ * ```
+ */
+export function getTestnetContractAddresses(
+  chain: TestnetChain,
+): ChainContracts {
+  return TESTNET_CONTRACT_ADDRESSES[chain] || {};
+}
+
+/**
+ * Get a specific contract address for a mainnet chain
  * @param chain The blockchain network
  * @param contractType The type of contract (manager, yUSD, vyUSD, etc.)
  * @returns The contract address or undefined if not found
@@ -179,7 +251,27 @@ export function getContractAddress(
 }
 
 /**
- * Get chain ID for a specific chain
+ * Get a specific contract address for a testnet chain
+ * @param chain The testnet blockchain network
+ * @param contractType The type of contract (manager, yUSD, vyUSD, etc.)
+ * @returns The contract address or undefined if not found
+ *
+ * @example
+ * ```typescript
+ * import { getTestnetContractAddress, TestnetChain } from 'yieldfi-sdk';
+ *
+ * const yUSDAddress = getTestnetContractAddress(TestnetChain.ETHEREUM_SEPOLIA, 'yUSD');
+ * ```
+ */
+export function getTestnetContractAddress(
+  chain: TestnetChain,
+  contractType: keyof ChainContracts,
+): string | undefined {
+  return TESTNET_CONTRACT_ADDRESSES[chain]?.[contractType];
+}
+
+/**
+ * Get chain ID for a specific mainnet chain
  * @param chain The blockchain network
  * @returns The chain ID as a string
  *
@@ -195,7 +287,23 @@ export function getChainId(chain: Chain): string {
 }
 
 /**
- * Get chain by chain ID
+ * Get chain ID for a specific testnet chain
+ * @param chain The testnet blockchain network
+ * @returns The chain ID as a string
+ *
+ * @example
+ * ```typescript
+ * import { getTestnetChainId, TestnetChain } from 'yieldfi-sdk';
+ *
+ * const chainId = getTestnetChainId(TestnetChain.ETHEREUM_SEPOLIA); // '11155111'
+ * ```
+ */
+export function getTestnetChainId(chain: TestnetChain): string {
+  return TESTNET_CHAIN_IDS[chain];
+}
+
+/**
+ * Get mainnet chain by chain ID
  * @param chainId The chain ID as a string
  * @returns The chain enum or undefined if not found
  *
@@ -213,7 +321,27 @@ export function getChainByChainId(chainId: string): Chain | undefined {
 }
 
 /**
- * Check if a chain is supported
+ * Get testnet chain by chain ID
+ * @param chainId The chain ID as a string
+ * @returns The testnet chain enum or undefined if not found
+ *
+ * @example
+ * ```typescript
+ * import { getTestnetChainByChainId } from 'yieldfi-sdk';
+ *
+ * const chain = getTestnetChainByChainId('11155111'); // TestnetChain.ETHEREUM_SEPOLIA
+ * ```
+ */
+export function getTestnetChainByChainId(
+  chainId: string,
+): TestnetChain | undefined {
+  return Object.entries(TESTNET_CHAIN_IDS).find(
+    ([_, id]) => id === chainId,
+  )?.[0] as TestnetChain | undefined;
+}
+
+/**
+ * Check if a mainnet chain is supported
  * @param chain The blockchain network
  * @returns True if the chain is supported
  *
@@ -231,7 +359,25 @@ export function isChainSupported(chain: Chain): boolean {
 }
 
 /**
- * Get all supported chains
+ * Check if a testnet chain is supported
+ * @param chain The testnet blockchain network
+ * @returns True if the testnet chain is supported
+ *
+ * @example
+ * ```typescript
+ * import { isTestnetChainSupported, TestnetChain } from 'yieldfi-sdk';
+ *
+ * if (isTestnetChainSupported(TestnetChain.ETHEREUM_SEPOLIA)) {
+ *   // Testnet chain is supported
+ * }
+ * ```
+ */
+export function isTestnetChainSupported(chain: TestnetChain): boolean {
+  return chain in TESTNET_CONTRACT_ADDRESSES;
+}
+
+/**
+ * Get all supported mainnet chains
  * @returns Array of supported chains
  *
  * @example
@@ -244,4 +390,20 @@ export function isChainSupported(chain: Chain): boolean {
  */
 export function getSupportedChains(): Chain[] {
   return Object.values(Chain);
+}
+
+/**
+ * Get all supported testnet chains
+ * @returns Array of supported testnet chains
+ *
+ * @example
+ * ```typescript
+ * import { getSupportedTestnetChains } from 'yieldfi-sdk';
+ *
+ * const chains = getSupportedTestnetChains();
+ * // [TestnetChain.ETHEREUM_SEPOLIA, TestnetChain.ARBITRUM_SEPOLIA, ...]
+ * ```
+ */
+export function getSupportedTestnetChains(): TestnetChain[] {
+  return Object.values(TestnetChain);
 }
