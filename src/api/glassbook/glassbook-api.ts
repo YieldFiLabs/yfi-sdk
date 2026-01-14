@@ -19,6 +19,10 @@ import {
   ReferralStats,
   CodeAvailability,
   ReferredAddressesResponse,
+  Price,
+  GetPricesRequest,
+  GetLatestPriceResponse,
+  GetPricesResponse,
 } from "../../types";
 
 export class GlassbookAPI {
@@ -442,4 +446,112 @@ export class GlassbookAPI {
     });
     return response.data;
   }
+
+  // ==================== PRICE ENDPOINTS ====================
+
+  /**
+   * Get latest price by symbol (public endpoint, no authentication required)
+   * GET /gb/prices/:symbol/latest
+   *
+   * @param symbol Asset symbol (e.g., eth, btc, usdc)
+   * @returns Latest price data
+   *
+   * @example
+   * ```typescript
+   * const price = await sdk.glassbook.getLatestPrice('eth');
+   * ```
+   */
+  async getLatestPrice(symbol: string): Promise<GetLatestPriceResponse> {
+    const response = await this.httpClient.get<{
+      success: boolean;
+      data: Price | null;
+    }>(`/${this.servicePrefix}/api/prices/${symbol}/latest`);
+    return {
+      data: response.data,
+    };
+  }
+
+  /**
+   * Get latest price by symbol and source (public endpoint, no authentication required)
+   * GET /gb/prices/:symbol/latest/:source
+   *
+   * @param symbol Asset symbol (e.g., eth, btc, usdc)
+   * @param source Price source (e.g., pyth, chainlink)
+   * @returns Latest price data from specific source
+   *
+   * @example
+   * ```typescript
+   * const price = await sdk.glassbook.getLatestPriceBySource('eth', 'pyth');
+   * ```
+   */
+  async getLatestPriceBySource(
+    symbol: string,
+    source: string,
+  ): Promise<GetLatestPriceResponse> {
+    const response = await this.httpClient.get<{
+      success: boolean;
+      data: Price | null;
+    }>(`/${this.servicePrefix}/api/prices/${symbol}/latest/${source}`);
+    return {
+      data: response.data,
+    };
+  }
+
+  /**
+   * Get prices with filters and pagination (public endpoint, no authentication required)
+   * GET /gb/prices
+   *
+   * @param filters Query filters
+   * @returns Paginated list of prices
+   *
+   * @example
+   * ```typescript
+   * const prices = await sdk.glassbook.getPrices({
+   *   symbol: 'eth',
+   *   source: 'pyth',
+   *   page: 1,
+   *   pageSize: 10
+   * });
+   * ```
+   */
+  async getPrices(filters?: GetPricesRequest): Promise<GetPricesResponse> {
+    const response = await this.httpClient.get<{
+      success: boolean;
+      data: Price[];
+      total: number;
+      page: number;
+      pageSize: number;
+      totalPages: number;
+    }>(`/${this.servicePrefix}/api/prices`, {
+      params: filters,
+    });
+    return {
+      data: response.data,
+      total: response.total,
+      page: response.page,
+      pageSize: response.pageSize,
+      totalPages: response.totalPages,
+    };
+  }
+
+  /**
+   * Get price by ID (public endpoint, no authentication required)
+   * GET /gb/prices/:id
+   *
+   * @param id Price ID
+   * @returns Price data
+   *
+   * @example
+   * ```typescript
+   * const price = await sdk.glassbook.getPriceById(123);
+   * ```
+   */
+  async getPriceById(id: number): Promise<Price> {
+    const response = await this.httpClient.get<{
+      success: boolean;
+      data: Price;
+    }>(`/${this.servicePrefix}/api/prices/${id}`);
+    return response.data;
+  }
+
 }

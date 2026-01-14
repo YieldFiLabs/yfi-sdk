@@ -252,10 +252,7 @@ describe("VaultAPI", () => {
                         symbol: "USDC",
                         decimals: 6,
                     },
-                    manager: {
-                        address: "0x1234567890123456789012345678901234567890",
-                        manager: "YieldFi Manager",
-                    },
+                    manager: "0x1234567890123456789012345678901234567890",
                     supportedAssets: [],
                     metrics: {
                         tvl: "1000000000000000000000000",
@@ -324,10 +321,7 @@ describe("VaultAPI", () => {
                         symbol: "USDC",
                         decimals: 6,
                     },
-                    manager: {
-                        address: "0x1234567890123456789012345678901234567890",
-                        manager: "YieldFi Manager",
-                    },
+                    manager: "0x1234567890123456789012345678901234567890",
                     supportedAssets: [],
                     metrics: {
                         tvl: "1000000000000000000000000",

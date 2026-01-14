@@ -28,6 +28,7 @@ export class HttpClient {
       headers: {
         "Content-Type": "application/json",
       },
+      validateStatus: () =>  true, // pass the information as is
     });
   }
 

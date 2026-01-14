@@ -9,6 +9,8 @@ import { HttpClient } from "../http";
 import { AuthAPI } from "../api/auth";
 import { GlassbookAPI } from "../api/glassbook";
 import { VaultAPI } from "../api/vault";
+import { FormAPI } from "../api/forms";
+import { CuratorHandoffAPI } from "../api/curator-handoff";
 import { V3API } from "./v3";
 
 /**
@@ -39,6 +41,19 @@ export class YieldFiSDK {
      * Contains all APIs available in version 3
      */
     public v3!: V3API;
+
+    /**
+     * Onboarding API
+     * @deprecated Use sdk.v3.onboarding instead. This property will be removed in a future version.
+     */
+    public onboarding!: FormAPI;
+    public forms!: FormAPI; // Alias for better semantics
+
+    /**
+     * Curator Handoff API
+     * @deprecated Use sdk.v3.curatorHandoff instead. This property will be removed in a future version.
+     */
+    public curatorHandoff!: CuratorHandoffAPI;
 
     /**
      * SDK configuration
@@ -118,7 +133,19 @@ export class YieldFiSDK {
 
         // Initialize versioned API namespaces
         const vaultAPI = this.container.get<VaultAPI>(SERVICE_NAMES.VAULT_API);
-        this.v3 = new V3API(vaultAPI);
+        const onboardingAPI = this.container.get<FormAPI>(
+            SERVICE_NAMES.ONBOARDING_API,
+        );
+        const curatorHandoffAPI = this.container.get<CuratorHandoffAPI>(
+            SERVICE_NAMES.CURATOR_HANDOFF_API,
+        );
+        this.v3 = new V3API(vaultAPI, onboardingAPI, curatorHandoffAPI);
+
+        // Legacy API access (deprecated - use sdk.v3.onboarding and sdk.v3.curatorHandoff instead)
+        // @deprecated Use sdk.v3.onboarding instead
+        this.onboarding = onboardingAPI;
+        // @deprecated Use sdk.v3.curatorHandoff instead
+        this.curatorHandoff = curatorHandoffAPI;
 
         // Future extensibility:
         // - Loading remote config
@@ -186,6 +213,36 @@ export class YieldFiSDK {
             SERVICE_NAMES.VAULT_API,
             () =>
                 new VaultAPI(
+                    this.container.get(SERVICE_NAMES.HTTP_CLIENT),
+                    this.container.get(SERVICE_NAMES.CONFIG),
+                ),
+            {
+                singleton: true,
+                lazy: false, // Actively loaded
+                dependencies: [SERVICE_NAMES.HTTP_CLIENT, SERVICE_NAMES.CONFIG],
+            },
+        );
+
+        // Register OnboardingAPI (singleton, not lazy)
+        this.container.register(
+            SERVICE_NAMES.ONBOARDING_API,
+            () =>
+                new FormAPI(
+                    this.container.get(SERVICE_NAMES.HTTP_CLIENT),
+                    this.container.get(SERVICE_NAMES.CONFIG),
+                ),
+            {
+                singleton: true,
+                lazy: false, // Actively loaded
+                dependencies: [SERVICE_NAMES.HTTP_CLIENT, SERVICE_NAMES.CONFIG],
+            },
+        );
+
+        // Register CuratorHandoffAPI (singleton, not lazy)
+        this.container.register(
+            SERVICE_NAMES.CURATOR_HANDOFF_API,
+            () =>
+                new CuratorHandoffAPI(
                     this.container.get(SERVICE_NAMES.HTTP_CLIENT),
                     this.container.get(SERVICE_NAMES.CONFIG),
                 ),

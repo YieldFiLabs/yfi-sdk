@@ -133,14 +133,6 @@ export interface VaultFaq {
 }
 
 /**
- * Vault manager
- */
-export interface VaultManager {
-  address: string | null;
-  manager: string | null;
-}
-
-/**
  * Vault details
  */
 export interface Vault {
@@ -152,7 +144,7 @@ export interface Vault {
   description: string | null;
   status: string;
   baseAsset: VaultBaseAsset;
-  manager: VaultManager;
+  manager: string | null;
   supportedAssets: SupportedAsset[];
   metrics: VaultMetrics;
   fees: VaultFees;

@@ -146,3 +146,47 @@ export interface ReferredAddressesResponse {
     totalPages: number;
   };
 }
+
+/**
+ * Price interface
+ */
+export interface Price {
+  id: number;
+  oracleId: string;
+  symbol: string;
+  price: number;
+  base: number;
+  source: string;
+  pricedAt: number | null;
+  createdAt: number;
+}
+
+/**
+ * Request for querying prices
+ */
+export interface GetPricesRequest {
+  symbol?: string;
+  source?: string;
+  startTime?: number;
+  endTime?: number;
+  page?: number;
+  pageSize?: number;
+}
+
+/**
+ * Response for latest price
+ */
+export interface GetLatestPriceResponse {
+  data: Price | null;
+}
+
+/**
+ * Paginated price response
+ */
+export interface GetPricesResponse {
+  data: Price[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
