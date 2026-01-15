@@ -2,6 +2,31 @@
 
 Official YieldFi SDK for interacting with YieldFi services through the gateway.
 
+## Version 0.3.0
+
+### New Features
+
+- **Transaction API**: Added comprehensive transaction endpoints for querying deposit and redemption transactions
+  - `getTransactions()` - Get transactions with pagination and filters
+  - `getTransactionById()` - Get transaction by ID
+  - `getTransactionByHash()` - Get transaction by hash
+  - `getTransactionFilterOptions()` - Get available filter options
+  - Role-based filtering: Regular users automatically see only their transactions, admins can see all
+
+- **Vault API Enhancements**: 
+  - Updated vault endpoints to use vault keys instead of addresses
+  - Added `getStrategies()` - Get distinct strategy types
+  - Added `getVaultFaqs()` - Get FAQs for a vault
+  - Added `getVaultBySymbol()` - Get vault by symbol
+  - Added `getPrivateVaultByKey()` - Get private vaults with authentication
+  - Updated response types to include rewards, partner information, and enhanced vault details
+
+### Breaking Changes
+
+- Vault API endpoints now use `/vault/api/public/vaults` and `/vault/api/vaults` paths instead of `/v3/vaults`
+- Vault methods now use `vaultKey` parameter instead of `address` parameter
+- Updated response types for vaults to include additional fields (rewards, partner, FAQs, etc.)
+
 ## Installation
 
 ```bash
@@ -256,6 +281,167 @@ const referralByAddress = await sdk.glassbook.getReferralByAddress(
   "0x..."
 );
 ```
+
+### Vault (`sdk.vault`)
+
+The Vault API provides access to vault information, protocol statistics, whitelisted assets, and transaction history. Most endpoints are public, but some require authentication for private vaults.
+
+#### Protocol Statistics
+
+```typescript
+// Get protocol-level statistics (public endpoint)
+const stats = await sdk.vault.getProtocolStats();
+console.log(`Total TVL: ${stats.stats.totalTvl}`);
+console.log(`Max APY: ${stats.stats.maxApy}`);
+console.log(`Total Users: ${stats.stats.totalUsers}`);
+
+// Refresh protocol statistics (requires authentication)
+const refreshedStats = await sdk.vault.refreshProtocolStats(accessToken);
+
+// Get distinct strategies (public endpoint)
+const strategies = await sdk.vault.getStrategies();
+console.log(`Available strategies: ${strategies.strategies.join(', ')}`);
+```
+
+#### Vault Information
+
+```typescript
+// Get all vaults with filters (public endpoint)
+const vaults = await sdk.vault.getVaults({
+  chainId: 1,
+  status: 'active',
+  page: 1,
+  pageSize: 20
+});
+
+// Get vault by key (public endpoint)
+const vault = await sdk.vault.getVaultByKey('yusd', 1);
+
+// Get vault by symbol (public endpoint)
+const vaultBySymbol = await sdk.vault.getVaultBySymbol('yUSD', 1);
+
+// Get private vault (requires authentication)
+const privateVault = await sdk.vault.getPrivateVaultByKey(
+  'private-vault-key',
+  '0x1234567890123456789012345678901234567890',
+  'user',
+  1,
+  accessToken
+);
+
+// Get vault details/fact sheet (public endpoint)
+const details = await sdk.vault.getVaultDetails('yusd', 1);
+
+// Get vault FAQs (public endpoint)
+const faqs = await sdk.vault.getVaultFaqs('yusd', 1);
+```
+
+#### Whitelisted Assets
+
+```typescript
+// Get all whitelisted assets for a vault (public endpoint)
+const assets = await sdk.vault.getWhitelistedAssets('yusd', 1, false);
+
+// Get specific whitelisted asset (public endpoint)
+const asset = await sdk.vault.getWhitelistedAsset(
+  'yusd',
+  '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+  1
+);
+
+// Check if asset is whitelisted (public endpoint)
+const checkResult = await sdk.vault.checkAssetWhitelisted(
+  'yusd',
+  '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+  1
+);
+
+if (checkResult.isWhitelisted) {
+  console.log('Asset is whitelisted');
+}
+
+// Add whitelisted asset (requires admin authentication)
+const newAsset = await sdk.vault.addWhitelistedAsset(
+  accessToken,
+  'yusd',
+  {
+    assetAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+    assetSymbol: 'USDC',
+    assetName: 'USD Coin',
+    assetDecimals: 6,
+    depositRedeemEnabled: 2 // 0 = none, 1 = deposit, 2 = both
+  },
+  1
+);
+
+// Remove whitelisted asset (requires admin authentication)
+await sdk.vault.removeWhitelistedAsset(
+  accessToken,
+  'yusd',
+  '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+  1
+);
+```
+
+#### Transactions
+
+The transaction endpoints allow you to query deposit and redemption transactions. **All transaction endpoints require authentication** and implement role-based filtering:
+
+- **Regular users**: Automatically filtered to show only their own transactions
+- **Admins/Moderators/Managers/LPs**: Can see all transactions
+
+```typescript
+const accessToken = localStorage.getItem("accessToken");
+
+// Get transactions with pagination and filters
+// Regular users: automatically filtered by authenticated address
+// Admins: can see all transactions, can optionally filter by userAddress
+const transactions = await sdk.vault.getTransactions({
+  chainId: 1,
+  vaultAddress: '0x5bE91d34FeFbB7554497a74e25dC6df96bFef5DB',
+  type: 'deposit',
+  status: 'PROCESSED',
+  page: 1,
+  pageSize: 20,
+  startDate: '2024-01-01T00:00:00.000Z',
+  endDate: '2024-01-31T23:59:59.999Z'
+}, accessToken);
+
+console.log(`Found ${transactions.pagination.total} transactions`);
+console.log(`Page ${transactions.pagination.page} of ${transactions.pagination.totalPages}`);
+
+// Get transaction by ID
+// Regular users: can only access their own transactions
+// Admins: can access any transaction
+const transaction = await sdk.vault.getTransactionById(1, accessToken);
+console.log(`Transaction ${transaction.transaction.id}: ${transaction.transaction.type}`);
+
+// Get transaction by hash
+const transactionByHash = await sdk.vault.getTransactionByHash(
+  '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+  1,
+  accessToken
+);
+
+// Get available filter options
+const filterOptions = await sdk.vault.getTransactionFilterOptions(accessToken);
+console.log('Available chain IDs:', filterOptions.filters.chainIds);
+console.log('Available statuses:', filterOptions.filters.statuses);
+console.log('Available types:', filterOptions.filters.types);
+```
+
+**Transaction Filter Parameters:**
+- `chainId` - Filter by blockchain chain ID
+- `vaultAddress` - Filter by vault address
+- `userAddress` - Filter by user address (admins only - regular users are automatically filtered)
+- `receiverAddress` - Filter by receiver address
+- `assetAddress` - Filter by asset address
+- `type` - Filter by transaction type: `'deposit'` or `'redemption'`
+- `status` - Filter by status: `'PENDING'`, `'PROCESSED'`, `'CANCELLED'`, `'NO-RETRY'`, or `'FAILED'`
+- `startDate` - Filter by start date (ISO 8601 format)
+- `endDate` - Filter by end date (ISO 8601 format)
+- `page` - Page number (default: 1)
+- `pageSize` - Items per page (default: 20, max: 100)
 
 ## Contract Addresses
 

@@ -19,6 +19,10 @@ import {
   CheckWhitelistedAssetResponse,
   VaultFaqsResponse,
   StrategiesResponse,
+  TransactionFilters,
+  TransactionListResponse,
+  TransactionResponse,
+  TransactionFilterOptionsResponse,
 } from "../../types";
 
 export class VaultAPI {
@@ -505,6 +509,138 @@ export class VaultAPI {
     const url = `/${this.servicePrefix}/api/public/vaults/${vaultKey}/assets/${assetAddress}/check?${queryParams.toString()}`;
 
     const response = await this.httpClient.get<CheckWhitelistedAssetResponse>(url, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  // ==================== TRANSACTION ENDPOINTS ====================
+
+  /**
+   * Get transactions with pagination and filters
+   * GET /vault/api/vaults/transactions
+   *
+   * @param filters Query filters (chainId, vaultAddress, userAddress, type, status, etc.)
+   * @param accessToken Access token (required for authenticated requests)
+   * @returns Paginated list of transactions
+   *
+   * @example
+   * ```typescript
+   * const transactions = await sdk.vault.getTransactions({
+   *   chainId: 1,
+   *   type: 'deposit',
+   *   status: 'PROCESSED',
+   *   page: 1,
+   *   pageSize: 20
+   * }, accessToken);
+   * ```
+   */
+  async getTransactions(
+    filters?: TransactionFilters,
+    accessToken?: string,
+  ): Promise<TransactionListResponse> {
+    const queryParams = new URLSearchParams();
+    if (filters?.chainId) queryParams.append("chainId", filters.chainId.toString());
+    if (filters?.vaultAddress) queryParams.append("vaultAddress", filters.vaultAddress);
+    if (filters?.userAddress) queryParams.append("userAddress", filters.userAddress);
+    if (filters?.receiverAddress) queryParams.append("receiverAddress", filters.receiverAddress);
+    if (filters?.assetAddress) queryParams.append("assetAddress", filters.assetAddress);
+    if (filters?.type) queryParams.append("type", filters.type);
+    if (filters?.status) queryParams.append("status", filters.status);
+    if (filters?.startDate) queryParams.append("startDate", filters.startDate);
+    if (filters?.endDate) queryParams.append("endDate", filters.endDate);
+    if (filters?.page) queryParams.append("page", filters.page.toString());
+    if (filters?.pageSize) queryParams.append("pageSize", filters.pageSize.toString());
+
+    const queryString = queryParams.toString();
+    const url = `/${this.servicePrefix}/api/vaults/transactions${queryString ? `?${queryString}` : ""}`;
+
+    console.log(url);
+
+    const response = await this.httpClient.get<TransactionListResponse>(url, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  /**
+   * Get transaction by ID
+   * GET /vault/api/vaults/transactions/:id
+   *
+   * @param id Transaction ID
+   * @param accessToken Access token (required for authenticated requests)
+   * @returns Transaction details
+   *
+   * @example
+   * ```typescript
+   * const transaction = await sdk.vault.getTransactionById(1, accessToken);
+   * ```
+   */
+  async getTransactionById(
+    id: number,
+    accessToken?: string,
+  ): Promise<TransactionResponse> {
+    const url = `/${this.servicePrefix}/api/vaults/transactions/${id}`;
+
+    const response = await this.httpClient.get<TransactionResponse>(url, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  /**
+   * Get transaction by hash
+   * GET /vault/api/vaults/transactions/hash/:txnHash
+   *
+   * @param txnHash Transaction hash
+   * @param chainId Chain ID (required)
+   * @param accessToken Access token (required for authenticated requests)
+   * @returns Transaction details
+   *
+   * @example
+   * ```typescript
+   * const transaction = await sdk.vault.getTransactionByHash(
+   *   '0x1234567890abcdef...',
+   *   1,
+   *   accessToken
+   * );
+   * ```
+   */
+  async getTransactionByHash(
+    txnHash: string,
+    chainId: number,
+    accessToken?: string,
+  ): Promise<TransactionResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append("chainId", chainId.toString());
+
+    const url = `/${this.servicePrefix}/api/vaults/transactions/hash/${txnHash}?${queryParams.toString()}`;
+
+    const response = await this.httpClient.get<TransactionResponse>(url, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  /**
+   * Get available filter options for transactions
+   * GET /vault/api/vaults/transactions/filters
+   *
+   * @param accessToken Access token (required for authenticated requests)
+   * @returns Available filter options (chainIds, statuses, types)
+   *
+   * @example
+   * ```typescript
+   * const filters = await sdk.vault.getTransactionFilterOptions(accessToken);
+   * console.log('Available chain IDs:', filters.filters.chainIds);
+   * ```
+   */
+  async getTransactionFilterOptions(
+    accessToken?: string,
+  ): Promise<TransactionFilterOptionsResponse> {
+    const url = `/${this.servicePrefix}/api/vaults/transactions/filters`;
+
+    const response = await this.httpClient.get<TransactionFilterOptionsResponse>(url, {
       headers: this.getAuthHeaders(accessToken),
     });
     return response;

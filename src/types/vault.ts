@@ -308,3 +308,73 @@ export interface CheckWhitelistedAssetResponse {
   isWhitelisted: boolean;
 }
 
+/**
+ * Transaction filters for listing transactions
+ */
+export interface TransactionFilters extends PaginationParams {
+  chainId?: number;
+  vaultAddress?: string;
+  userAddress?: string;
+  receiverAddress?: string;
+  assetAddress?: string;
+  type?: 'deposit' | 'redemption';
+  status?: 'PENDING' | 'PROCESSED' | 'CANCELLED' | 'NO-RETRY' | 'FAILED';
+  startDate?: string; // ISO 8601 date string
+  endDate?: string; // ISO 8601 date string
+}
+
+/**
+ * Transaction record
+ */
+export interface Transaction {
+  id: number;
+  chainId: number;
+  txnHash: string;
+  type: 'deposit' | 'redemption';
+  vaultAddress: string;
+  userAddress: string;
+  receiverAddress?: string | null;
+  assetAddress: string;
+  status: 'PENDING' | 'PROCESSED' | 'CANCELLED' | 'NO-RETRY' | 'FAILED';
+  queueIndex?: number | null;
+  assetAmount?: string | null;
+  sharesAmount?: string | null;
+  metaData?: Record<string, any> | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Transaction list response
+ */
+export interface TransactionListResponse {
+  success: boolean;
+  transactions: Transaction[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+/**
+ * Transaction response
+ */
+export interface TransactionResponse {
+  success: boolean;
+  transaction: Transaction;
+}
+
+/**
+ * Transaction filter options response
+ */
+export interface TransactionFilterOptionsResponse {
+  success: boolean;
+  filters: {
+    chainIds: number[];
+    statuses: string[];
+    types: string[];
+  };
+}
+
