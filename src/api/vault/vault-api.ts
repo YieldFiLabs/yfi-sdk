@@ -239,10 +239,8 @@ export class VaultAPI {
    */
   async getPrivateVaultByKey(
     vaultKey: string,
-    userAddress: string,
-    userRole: string,
     chainId: number = 1,
-    accessToken?: string,
+    accessToken: string
   ): Promise<VaultResponse> {
     const queryParams = new URLSearchParams();
     queryParams.append("chainId", chainId.toString());
