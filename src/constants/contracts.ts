@@ -48,6 +48,22 @@ export const CHAIN_IDS: Record<Chain, string> = {
 };
 
 /**
+ * Native gas token symbols for each supported mainnet network
+ */
+export const CHAIN_GAS_SYMBOLS: Record<Chain, string> = {
+  [Chain.ETHEREUM]: "ETH",
+  [Chain.ARBITRUM]: "ETH",
+  [Chain.BASE]: "ETH",
+  [Chain.OPTIMISM]: "ETH",
+  [Chain.SONIC]: "SONIC",
+  [Chain.PLUME]: "ETH",
+  [Chain.KATANA]: "ETH",
+  [Chain.BNB]: "BNB",
+  [Chain.AVALANCHE]: "AVAX",
+  [Chain.TAC]: "TAC",
+};
+
+/**
  * Chain IDs for each supported testnet network
  */
 export const TESTNET_CHAIN_IDS: Record<TestnetChain, string> = {
@@ -57,6 +73,18 @@ export const TESTNET_CHAIN_IDS: Record<TestnetChain, string> = {
   [TestnetChain.OPTIMISM_SEPOLIA]: "11155420",
   [TestnetChain.BNB_TESTNET]: "97",
   [TestnetChain.AVALANCHE_FUJI]: "43113",
+};
+
+/**
+ * Native gas token symbols for each supported testnet network
+ */
+export const TESTNET_CHAIN_GAS_SYMBOLS: Record<TestnetChain, string> = {
+  [TestnetChain.ETHEREUM_SEPOLIA]: "ETH",
+  [TestnetChain.ARBITRUM_SEPOLIA]: "ETH",
+  [TestnetChain.BASE_SEPOLIA]: "ETH",
+  [TestnetChain.OPTIMISM_SEPOLIA]: "ETH",
+  [TestnetChain.BNB_TESTNET]: "BNB",
+  [TestnetChain.AVALANCHE_FUJI]: "AVAX",
 };
 
 /**
