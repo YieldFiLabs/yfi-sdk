@@ -11,6 +11,7 @@ import { GlassbookAPI } from "../api/glassbook";
 import { VaultAPI } from "../api/vault";
 import { FormAPI } from "../api/forms";
 import { CuratorHandoffAPI } from "../api/curator-handoff";
+import { PointsAPI } from "../api/points";
 import { V3API } from "./v3";
 
 /**
@@ -35,6 +36,11 @@ export class YieldFiSDK {
      * Glassbook API
      */
     public glassbook!: GlassbookAPI;
+
+    /**
+     * Points API (user points, balances, protocol points)
+     */
+    public points!: PointsAPI;
 
     /**
      * V3 API namespace
@@ -130,6 +136,7 @@ export class YieldFiSDK {
         this.glassbook = this.container.get<GlassbookAPI>(
             SERVICE_NAMES.GLASSBOOK_API,
         );
+        this.points = this.container.get<PointsAPI>(SERVICE_NAMES.POINTS_API);
 
         // Initialize versioned API namespaces
         const vaultAPI = this.container.get<VaultAPI>(SERVICE_NAMES.VAULT_API);
@@ -198,6 +205,21 @@ export class YieldFiSDK {
             SERVICE_NAMES.GLASSBOOK_API,
             () =>
                 new GlassbookAPI(
+                    this.container.get(SERVICE_NAMES.HTTP_CLIENT),
+                    this.container.get(SERVICE_NAMES.CONFIG),
+                ),
+            {
+                singleton: true,
+                lazy: false, // Actively loaded
+                dependencies: [SERVICE_NAMES.HTTP_CLIENT, SERVICE_NAMES.CONFIG],
+            },
+        );
+
+        // Register PointsAPI (singleton, not lazy)
+        this.container.register(
+            SERVICE_NAMES.POINTS_API,
+            () =>
+                new PointsAPI(
                     this.container.get(SERVICE_NAMES.HTTP_CLIENT),
                     this.container.get(SERVICE_NAMES.CONFIG),
                 ),

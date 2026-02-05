@@ -14,6 +14,7 @@ export const DEFAULT_CONFIG: Partial<SDKConfig> = {
     glassbook: "gb",
     keystone: "ks",
     vault: "vault",
+    points: "pts",
   },
   timeout: 30000,
   retryAttempts: 3,

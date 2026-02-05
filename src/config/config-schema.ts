@@ -22,12 +22,14 @@ export const SDKConfigSchema = z.object({
       glassbook: z.string().default("gb"),
       keystone: z.string().default("ks"),
       vault: z.string().default("vault"),
+      points: z.string().default("pts"),
     })
     .default({
       auth: "auth",
       glassbook: "gb",
       keystone: "ks",
       vault: "vault",
+      points: "pts",
     }),
 
   /**
