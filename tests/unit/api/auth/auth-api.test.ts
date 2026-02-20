@@ -11,6 +11,7 @@ import {
     NonceResponse,
     RefreshTokenResponse,
     AuthUser,
+    GoogleSignupUrlResponse,
 } from "../../../../src/types";
 
 jest.mock("../../../../src/http");
@@ -204,6 +205,103 @@ describe("AuthAPI", () => {
 
             await expect(authAPI.logout("invalid-token")).rejects.toThrow(
                 AuthenticationError,
+            );
+        });
+    });
+
+    describe("loginWithGoogle", () => {
+        it("should login with Google and include partnerId from config", async () => {
+            const mockUser: AuthUser = {
+                id: "user-123",
+                address: "social:google:abc",
+                role: "user",
+                email: "user@example.com",
+                name: "Test User",
+            };
+
+            const expectedResponse: LoginResponse = {
+                token: "legacy-token",
+                expiresAt: 1234567890,
+                accessToken: "access-token-jwt",
+                refreshToken: "refresh-token-hex",
+                accessTokenExpiresAt: 1234567890,
+                refreshTokenExpiresAt: 1234974890,
+                user: mockUser,
+            };
+
+            mockHttpClient.post.mockResolvedValue(expectedResponse);
+
+            const result = await authAPI.loginWithGoogle({
+                idToken: "google-id-token",
+            });
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.post).toHaveBeenCalledWith("/auth/login/google", {
+                idToken: "google-id-token",
+                partnerId: "test-partner-123",
+            });
+        });
+    });
+
+    describe("getGoogleSignupUrl", () => {
+        it("should return Google signup URL", async () => {
+            const expectedResponse: GoogleSignupUrlResponse = {
+                url: "https://accounts.google.com/o/oauth2/v2/auth?...",
+            };
+
+            mockHttpClient.get.mockResolvedValue(expectedResponse);
+
+            const result = await authAPI.getGoogleSignupUrl({
+                redirectUri: "https://app.example.com/auth/callback",
+            });
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.get).toHaveBeenCalledWith(
+                "/auth/google/signup-url",
+                {
+                    params: {
+                        redirectUri: "https://app.example.com/auth/callback",
+                    },
+                },
+            );
+        });
+    });
+
+    describe("connectGoogle", () => {
+        it("should connect Google with access token", async () => {
+            const response = { message: "Google account linked successfully" };
+            mockHttpClient.post.mockResolvedValue(response);
+
+            const result = await authAPI.connectGoogle(
+                { idToken: "google-id-token" },
+                "access-token-jwt",
+            );
+
+            expect(result).toEqual(response);
+            expect(mockHttpClient.post).toHaveBeenCalledWith(
+                "/auth/connect/google",
+                { idToken: "google-id-token" },
+                {
+                    headers: {
+                        Authorization: "Bearer access-token-jwt",
+                    },
+                },
+            );
+        });
+
+        it("should connect Google without access token", async () => {
+            const response = { message: "Google account linked successfully" };
+            mockHttpClient.post.mockResolvedValue(response);
+
+            const result = await authAPI.connectGoogle({
+                idToken: "google-id-token",
+            });
+
+            expect(result).toEqual(response);
+            expect(mockHttpClient.post).toHaveBeenCalledWith(
+                "/auth/connect/google",
+                { idToken: "google-id-token" },
+                undefined,
             );
         });
     });

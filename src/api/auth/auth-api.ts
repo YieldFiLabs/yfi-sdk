@@ -12,6 +12,11 @@ import { AuthenticationError } from "../../errors";
 import {
   LoginRequest,
   LoginResponse,
+  GoogleLoginRequest,
+  GoogleSignupUrlRequest,
+  GoogleSignupUrlResponse,
+  GoogleConnectRequest,
+  ConnectGoogleResponse,
   RefreshTokenRequest,
   RefreshTokenResponse,
   NonceRequest,
@@ -103,6 +108,89 @@ export class AuthAPI {
       return response;
     } catch (error: any) {
       throw new AuthenticationError("Login failed", {
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * Login/signup using Google ID token
+   * @param request Google login request
+   * @returns Authentication response with tokens and user info
+   */
+  async loginWithGoogle(
+    request: Omit<GoogleLoginRequest, "partnerId">,
+  ): Promise<LoginResponse> {
+    try {
+      const fullRequest: GoogleLoginRequest = {
+        ...request,
+        partnerId: this.config.partnerId,
+      };
+
+      const response = await this.httpClient.post<LoginResponse>(
+        `/${this.authPrefix}/login/google`,
+        fullRequest,
+      );
+
+      return response;
+    } catch (error: any) {
+      throw new AuthenticationError("Google login failed", {
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * Get Google OAuth signup URL (redirect flow)
+   * @param request Redirect URI payload
+   * @returns Google OAuth URL
+   */
+  async getGoogleSignupUrl(
+    request: GoogleSignupUrlRequest,
+  ): Promise<GoogleSignupUrlResponse> {
+    try {
+      const response = await this.httpClient.get<GoogleSignupUrlResponse>(
+        `/${this.authPrefix}/google/signup-url`,
+        {
+          params: {
+            redirectUri: request.redirectUri,
+          },
+        },
+      );
+
+      return response;
+    } catch (error: any) {
+      throw new AuthenticationError("Failed to generate Google signup URL", {
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * Connect Google account.
+   * If accessToken is provided, links Google to authenticated wallet user.
+   * If accessToken is omitted, backend may return login tokens for social-only flow.
+   */
+  async connectGoogle(
+    request: GoogleConnectRequest,
+    accessToken?: string,
+  ): Promise<ConnectGoogleResponse> {
+    try {
+      const response = await this.httpClient.post<ConnectGoogleResponse>(
+        `/${this.authPrefix}/connect/google`,
+        request,
+        accessToken
+          ? {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          : undefined,
+      );
+
+      return response;
+    } catch (error: any) {
+      throw new AuthenticationError("Failed to connect Google account", {
         error: error.message,
       });
     }

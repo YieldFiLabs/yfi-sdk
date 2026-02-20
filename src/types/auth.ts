@@ -75,6 +75,16 @@ export interface AuthUser {
    * User role
    */
   role: string;
+
+  /**
+   * Optional email (present for social login)
+   */
+  email?: string;
+
+  /**
+   * Optional display name (present for social login)
+   */
+  name?: string;
 }
 
 /**
@@ -116,6 +126,58 @@ export interface LoginResponse {
    */
   user: AuthUser;
 }
+
+/**
+ * Google login request payload
+ */
+export interface GoogleLoginRequest {
+  /**
+   * Google ID token
+   */
+  idToken: string;
+
+  /**
+   * Optional partner ID for tracking
+   */
+  partnerId?: string;
+}
+
+/**
+ * Request payload for generating Google OAuth signup URL
+ */
+export interface GoogleSignupUrlRequest {
+  /**
+   * Full redirect URL where user should be sent after login
+   */
+  redirectUri: string;
+}
+
+/**
+ * Response for Google OAuth signup URL generation
+ */
+export interface GoogleSignupUrlResponse {
+  /**
+   * Fully formed Google OAuth URL
+   */
+  url: string;
+}
+
+/**
+ * Request payload for connecting Google account
+ */
+export interface GoogleConnectRequest {
+  /**
+   * Google ID token
+   */
+  idToken: string;
+}
+
+/**
+ * Connect Google response:
+ * - If called with access token: link confirmation message
+ * - If called without access token: login-style token response
+ */
+export type ConnectGoogleResponse = { message: string } | LoginResponse;
 
 /**
  * Refresh token request payload
