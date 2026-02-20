@@ -12,11 +12,10 @@ import { AuthenticationError } from "../../errors";
 import {
   LoginRequest,
   LoginResponse,
-  GoogleLoginRequest,
-  GoogleSignupUrlRequest,
-  GoogleSignupUrlResponse,
-  GoogleConnectRequest,
-  ConnectGoogleResponse,
+  GoogleLoginUrlRequest,
+  GoogleLoginUrlResponse,
+  GoogleCallbackRequest,
+  GoogleCallbackResponse,
   RefreshTokenRequest,
   RefreshTokenResponse,
   NonceRequest,
@@ -114,45 +113,19 @@ export class AuthAPI {
   }
 
   /**
-   * Login/signup using Google ID token
-   * @param request Google login request
-   * @returns Authentication response with tokens and user info
-   */
-  async loginWithGoogle(
-    request: Omit<GoogleLoginRequest, "partnerId">,
-  ): Promise<LoginResponse> {
-    try {
-      const fullRequest: GoogleLoginRequest = {
-        ...request,
-        partnerId: this.config.partnerId,
-      };
-
-      const response = await this.httpClient.post<LoginResponse>(
-        `/${this.authPrefix}/login/google`,
-        fullRequest,
-      );
-
-      return response;
-    } catch (error: any) {
-      throw new AuthenticationError("Google login failed", {
-        error: error.message,
-      });
-    }
-  }
-
-  /**
-   * Get Google OAuth signup URL (redirect flow)
-   * @param request Redirect URI payload
+   * Get Google OAuth login URL
+   * @param request domain and redirectUri
    * @returns Google OAuth URL
    */
-  async getGoogleSignupUrl(
-    request: GoogleSignupUrlRequest,
-  ): Promise<GoogleSignupUrlResponse> {
+  async getGoogleLoginUrl(
+    request: GoogleLoginUrlRequest,
+  ): Promise<GoogleLoginUrlResponse> {
     try {
-      const response = await this.httpClient.get<GoogleSignupUrlResponse>(
-        `/${this.authPrefix}/google/signup-url`,
+      const response = await this.httpClient.get<GoogleLoginUrlResponse>(
+        `/${this.authPrefix}/google/login`,
         {
           params: {
+            domain: request.domain,
             redirectUri: request.redirectUri,
           },
         },
@@ -160,37 +133,35 @@ export class AuthAPI {
 
       return response;
     } catch (error: any) {
-      throw new AuthenticationError("Failed to generate Google signup URL", {
+      throw new AuthenticationError("Failed to generate Google login URL", {
         error: error.message,
       });
     }
   }
 
   /**
-   * Connect Google account.
-   * If accessToken is provided, links Google to authenticated wallet user.
-   * If accessToken is omitted, backend may return login tokens for social-only flow.
+   * Exchange Google OAuth code and state for tokens (callback)
+   * Call after user returns from Google with code and state in URL
+   * @param request code and state from OAuth redirect
+   * @returns Tokens and redirectUri
    */
-  async connectGoogle(
-    request: GoogleConnectRequest,
-    accessToken?: string,
-  ): Promise<ConnectGoogleResponse> {
+  async exchangeGoogleAuthCode(
+    request: GoogleCallbackRequest,
+  ): Promise<GoogleCallbackResponse> {
     try {
-      const response = await this.httpClient.post<ConnectGoogleResponse>(
-        `/${this.authPrefix}/connect/google`,
-        request,
-        accessToken
-          ? {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            }
-          : undefined,
+      const response = await this.httpClient.get<GoogleCallbackResponse>(
+        `/${this.authPrefix}/google/callback`,
+        {
+          params: {
+            code: request.code,
+            state: request.state,
+          },
+        },
       );
 
       return response;
     } catch (error: any) {
-      throw new AuthenticationError("Failed to connect Google account", {
+      throw new AuthenticationError("Failed to exchange Google auth code", {
         error: error.message,
       });
     }

@@ -128,24 +128,15 @@ export interface LoginResponse {
 }
 
 /**
- * Google login request payload
+ * Request payload for generating Google OAuth login URL
  */
-export interface GoogleLoginRequest {
+export interface GoogleLoginUrlRequest {
   /**
-   * Google ID token
+   * Gateway domain used to construct Google callback URI
+   * Example: https://gw.yield.fi
    */
-  idToken: string;
+  domain: string;
 
-  /**
-   * Optional partner ID for tracking
-   */
-  partnerId?: string;
-}
-
-/**
- * Request payload for generating Google OAuth signup URL
- */
-export interface GoogleSignupUrlRequest {
   /**
    * Full redirect URL where user should be sent after login
    */
@@ -153,9 +144,9 @@ export interface GoogleSignupUrlRequest {
 }
 
 /**
- * Response for Google OAuth signup URL generation
+ * Response for Google OAuth login URL generation
  */
-export interface GoogleSignupUrlResponse {
+export interface GoogleLoginUrlResponse {
   /**
    * Fully formed Google OAuth URL
    */
@@ -163,21 +154,23 @@ export interface GoogleSignupUrlResponse {
 }
 
 /**
- * Request payload for connecting Google account
+ * Request for exchanging Google OAuth code for tokens
  */
-export interface GoogleConnectRequest {
-  /**
-   * Google ID token
-   */
-  idToken: string;
+export interface GoogleCallbackRequest {
+  code: string;
+  state: string;
 }
 
 /**
- * Connect Google response:
- * - If called with access token: link confirmation message
- * - If called without access token: login-style token response
+ * Response from Google OAuth callback (tokens)
  */
-export type ConnectGoogleResponse = { message: string } | LoginResponse;
+export interface GoogleCallbackResponse {
+  access_token: string;
+  refresh_token: string;
+  access_token_expires_at: number;
+  refresh_token_expires_at: number;
+  redirectUri: string;
+}
 
 /**
  * Refresh token request payload
