@@ -11,6 +11,7 @@ Official YieldFi SDK for interacting with YieldFi services through the gateway.
   - `getTransactionById()` - Get transaction by ID
   - `getTransactionByHash()` - Get transaction by hash
   - `getTransactionFilterOptions()` - Get available filter options
+  - `getPendingRedemptionsSummary()` - Get pending redemptions per vault/chain (curator-only)
   - Role-based filtering: Regular users automatically see only their transactions, admins can see all
 
 - **Vault API Enhancements**: 
@@ -428,6 +429,13 @@ const filterOptions = await sdk.vault.getTransactionFilterOptions(accessToken);
 console.log('Available chain IDs:', filterOptions.filters.chainIds);
 console.log('Available statuses:', filterOptions.filters.statuses);
 console.log('Available types:', filterOptions.filters.types);
+
+// Get pending redemptions summary (curator-only)
+const pendingSummary = await sdk.vault.getPendingRedemptionsSummary(accessToken);
+console.log(`Total pending redemptions: ${pendingSummary.data.total}`);
+pendingSummary.data.pendingRedemptions.forEach((row) => {
+  console.log(`Chain ${row.chainId} Vault ${row.vaultAddress}: ${row.count} (assets: ${row.totalAssetAmount}, shares: ${row.totalSharesAmount})`);
+});
 ```
 
 **Transaction Filter Parameters:**

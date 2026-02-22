@@ -378,3 +378,25 @@ export interface TransactionFilterOptionsResponse {
   };
 }
 
+/**
+ * Pending redemption summary item (per vault and chain)
+ */
+export interface PendingRedemptionSummaryItem {
+  chainId: number;
+  vaultAddress: string;
+  count: number;
+  totalAssetAmount: string;
+  totalSharesAmount: string;
+}
+
+/**
+ * Pending redemptions summary response (curator-only)
+ */
+export interface PendingRedemptionsSummaryResponse {
+  success: boolean;
+  data: {
+    pendingRedemptions: PendingRedemptionSummaryItem[];
+    total: number;
+  };
+}
+

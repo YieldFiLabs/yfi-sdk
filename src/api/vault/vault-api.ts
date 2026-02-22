@@ -23,6 +23,7 @@ import {
   TransactionListResponse,
   TransactionResponse,
   TransactionFilterOptionsResponse,
+  PendingRedemptionsSummaryResponse,
 } from "../../types";
 
 export class VaultAPI {
@@ -639,6 +640,35 @@ export class VaultAPI {
     const url = `/${this.servicePrefix}/api/vaults/transactions/filters`;
 
     const response = await this.httpClient.get<TransactionFilterOptionsResponse>(url, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  /**
+   * Get pending redemptions summary per vault and per chain (curator-only)
+   * GET /vault/api/vaults/transactions/pending-redemptions-summary
+   *
+   * Requires curator role. Returns total pending redemptions grouped by chain and vault.
+   *
+   * @param accessToken Access token (required - must be curator)
+   * @returns Pending redemptions summary with count, total asset amount, and total shares amount per vault/chain
+   *
+   * @example
+   * ```typescript
+   * const summary = await sdk.vault.getPendingRedemptionsSummary(accessToken);
+   * console.log('Total pending:', summary.data.total);
+   * summary.data.pendingRedemptions.forEach((row) => {
+   *   console.log(`Chain ${row.chainId} Vault ${row.vaultAddress}: ${row.count} (assets: ${row.totalAssetAmount}, shares: ${row.totalSharesAmount})`);
+   * });
+   * ```
+   */
+  async getPendingRedemptionsSummary(
+    accessToken: string,
+  ): Promise<PendingRedemptionsSummaryResponse> {
+    const url = `/${this.servicePrefix}/api/vaults/transactions/pending-redemptions-summary`;
+
+    const response = await this.httpClient.get<PendingRedemptionsSummaryResponse>(url, {
       headers: this.getAuthHeaders(accessToken),
     });
     return response;
