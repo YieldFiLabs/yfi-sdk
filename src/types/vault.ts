@@ -192,6 +192,9 @@ export interface VaultDetails {
   risks: string | null;
   feeStructure: string | null;
   audits: any[] | null;
+  backingRatio: number | null;
+  yieldBuffer: number | null;
+  slaWarningThreshold: number | null;
   updatedAt: string;
 }
 

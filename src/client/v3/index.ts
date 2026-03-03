@@ -5,6 +5,7 @@
 import { VaultAPI } from "../../api/vault";
 import { FormAPI } from "../../api/forms";
 import { CuratorHandoffAPI } from "../../api/curator-handoff";
+import { CuratorAPI } from "../../api/curator";
 
 /**
  * V3 API namespace
@@ -29,15 +30,23 @@ export class V3API {
    */
   public readonly curatorHandoff: CuratorHandoffAPI;
 
+  /**
+   * Curator API
+   * Curator onboarding, curator vaults, admin curator endpoints
+   */
+  public readonly curator: CuratorAPI;
+
   constructor(
     vaultAPI: VaultAPI,
     onboardingAPI: FormAPI,
     curatorHandoffAPI: CuratorHandoffAPI,
+    curatorAPI: CuratorAPI,
   ) {
     this.vault = vaultAPI;
     this.onboarding = onboardingAPI; // Keeping for backward compatibility
     this.forms = onboardingAPI; // New semantic name
     this.curatorHandoff = curatorHandoffAPI;
+    this.curator = curatorAPI;
   }
 }
 

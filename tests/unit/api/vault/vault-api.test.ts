@@ -18,6 +18,12 @@ import {
     VaultFaqsResponse,
     StrategiesResponse,
 } from "../../../../src/types";
+import {
+    TransactionSettingsBody,
+    TransactionSettingsResponse,
+    VaultSlaBody,
+    VaultSlaResponse,
+} from "../../../../src/types/curator";
 
 jest.mock("../../../../src/http");
 
@@ -36,6 +42,7 @@ describe("VaultAPI", () => {
         mockHttpClient = {
             get: jest.fn(),
             post: jest.fn(),
+            put: jest.fn(),
             delete: jest.fn(),
         } as any;
 
@@ -444,6 +451,9 @@ describe("VaultAPI", () => {
                     risks: "Smart contract risk",
                     feeStructure: "2% management fee, 20% performance fee",
                     audits: [],
+                    backingRatio: 1,
+                    yieldBuffer: 0.1,
+                    slaWarningThreshold: 12,
                     updatedAt: "2024-01-01T12:00:00.000Z",
                 },
             };
@@ -495,6 +505,9 @@ describe("VaultAPI", () => {
                             date: "2024-01-01",
                         },
                     ],
+                    backingRatio: 1,
+                    yieldBuffer: 0.1,
+                    slaWarningThreshold: 12,
                     updatedAt: "2024-01-01T12:00:00.000Z",
                 },
             };
@@ -529,6 +542,9 @@ describe("VaultAPI", () => {
                     risks: "Smart contract risk, impermanent loss",
                     feeStructure: "2% management fee, 20% performance fee",
                     audits: [],
+                    backingRatio: 1,
+                    yieldBuffer: 0.1,
+                    slaWarningThreshold: 12,
                     updatedAt: "2024-01-01T12:00:00.000Z",
                 },
             };
@@ -936,6 +952,130 @@ describe("VaultAPI", () => {
 
             await expect(
                 vaultAPI.checkAssetWhitelisted(testVaultKey, testAssetAddress, testChainId),
+            ).rejects.toThrow(NetworkError);
+        });
+    });
+
+    describe("updateTransactionSettings", () => {
+        it("should update transaction settings", async () => {
+            const body: TransactionSettingsBody = {
+                vaultKey: testVaultKey,
+                chainId: testChainId,
+                status: "PAUSE",
+                auto: true,
+                order: 1,
+                threshold: 100,
+            };
+
+            const expectedResponse: TransactionSettingsResponse = {
+                success: true,
+                settings: {
+                    vaultKey: testVaultKey,
+                    chainId: testChainId,
+                    pauseTransactions: true,
+                    autoPause: true,
+                    autoTrigger: false,
+                    processingOrder: 1,
+                    orderThreshold: "100",
+                    updatedAt: "2024-01-01T12:00:00.000Z",
+                },
+                timestamp: "2024-01-01T12:00:00.000Z",
+            };
+
+            mockHttpClient.put.mockResolvedValue(expectedResponse);
+
+            const result = await vaultAPI.updateTransactionSettings(
+                testAccessToken,
+                body,
+            );
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.put).toHaveBeenCalledWith(
+                "/vault/api/vaults/transactions/settings",
+                body,
+                {
+                    headers: {
+                        Authorization: `Bearer ${testAccessToken}`,
+                    },
+                },
+            );
+        });
+
+        it("should throw NetworkError on failure", async () => {
+            const body: TransactionSettingsBody = {
+                vaultKey: testVaultKey,
+                status: "PROCESS",
+            };
+            mockHttpClient.put.mockRejectedValue(new NetworkError("Network error"));
+
+            await expect(
+                vaultAPI.updateTransactionSettings(testAccessToken, body),
+            ).rejects.toThrow(NetworkError);
+        });
+    });
+
+    describe("updateVaultSla", () => {
+        it("should update vault SLA", async () => {
+            const body: VaultSlaBody = {
+                time: 24,
+                threshold: 12,
+            };
+
+            const expectedResponse: VaultSlaResponse = {
+                success: true,
+                message: "Vault SLA updated",
+                timestamp: "2024-01-01T12:00:00.000Z",
+            };
+
+            mockHttpClient.put.mockResolvedValue(expectedResponse);
+
+            const result = await vaultAPI.updateVaultSla(
+                testAccessToken,
+                testVaultKey,
+                body,
+                testChainId,
+            );
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.put).toHaveBeenCalledWith(
+                `/vault/api/vaults/${testVaultKey}/sla?chainId=${testChainId}`,
+                body,
+                {
+                    headers: {
+                        Authorization: `Bearer ${testAccessToken}`,
+                    },
+                },
+            );
+        });
+
+        it("should use default chainId of 1 when not provided", async () => {
+            const body: VaultSlaBody = { time: 48 };
+            mockHttpClient.put.mockResolvedValue({
+                success: true,
+                message: "Updated",
+                timestamp: "2024-01-01T12:00:00.000Z",
+            });
+
+            await vaultAPI.updateVaultSla(testAccessToken, testVaultKey, body);
+
+            expect(mockHttpClient.put).toHaveBeenCalledWith(
+                `/vault/api/vaults/${testVaultKey}/sla?chainId=1`,
+                body,
+                expect.any(Object),
+            );
+        });
+
+        it("should throw NetworkError on failure", async () => {
+            const body: VaultSlaBody = { threshold: 6 };
+            mockHttpClient.put.mockRejectedValue(new NetworkError("Network error"));
+
+            await expect(
+                vaultAPI.updateVaultSla(
+                    testAccessToken,
+                    testVaultKey,
+                    body,
+                    testChainId,
+                ),
             ).rejects.toThrow(NetworkError);
         });
     });

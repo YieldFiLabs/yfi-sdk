@@ -2,9 +2,22 @@
 
 Official YieldFi SDK for interacting with YieldFi services through the gateway.
 
-## Version 0.3.0
+## Version 0.3.x
 
-### New Features
+### New Features (0.3.6+)
+
+- **Curator API** (`sdk.curator`): Curator onboarding and admin endpoints
+  - `createCurator()` - Onboard a new curator with vaults and contact info
+  - `getCuratorVaults()` - List vaults for the authenticated curator
+  - `getAllCurators()` - List all curators (admin)
+  - `getAllCuratorVaults()` - List vaults grouped by curator (admin)
+
+- **Vault API - Curator Settings**: Transaction and SLA management for curators
+  - `updateTransactionSettings()` - Pause/process, auto pause/trigger, processing order
+  - `updateVaultSla()` - Set redemption SLA and warning threshold
+  - `getVaultDetails()` - Now includes `backingRatio`, `yieldBuffer`, `slaWarningThreshold`
+
+### New Features (0.3.0)
 
 - **Transaction API**: Added comprehensive transaction endpoints for querying deposit and redemption transactions
   - `getTransactions()` - Get transactions with pagination and filters
@@ -120,6 +133,11 @@ localStorage.removeItem("user");
 ```
 
 ## API Modules
+
+- **Authentication** (`sdk.auth`) - User authentication via wallet signatures
+- **Curator** (`sdk.curator`) - Curator onboarding and admin endpoints
+- **Glassbook** (`sdk.glassbook`) - Partner transactions and referrals
+- **Vault** (`sdk.vault`) - Vault info, protocol stats, whitelisted assets, transactions, curator settings
 
 ### Authentication (`sdk.auth`)
 
@@ -283,9 +301,45 @@ const referralByAddress = await sdk.glassbook.getReferralByAddress(
 );
 ```
 
+### Curator (`sdk.curator`)
+
+The Curator API provides curator onboarding and admin endpoints. **All methods require authentication** (curator or admin role).
+
+```typescript
+const accessToken = localStorage.getItem("accessToken");
+
+// Create curator (onboard)
+const result = await sdk.curator.createCurator(accessToken, {
+  name: "My Curator",
+  userId: "0x...",
+  vaults: [
+    {
+      vaultName: "My Vault",
+      vaultSymbol: "MV",
+      websiteUrl: "https://example.com",
+    },
+  ],
+  contact: {
+    email: "curator@example.com",
+    telegram: "@curator",
+    discord: "curator#1234",
+  },
+  additionalNotes: "Optional notes",
+});
+
+// Get curator's vaults (curator-only)
+const vaults = await sdk.curator.getCuratorVaults(accessToken);
+
+// Get all curators (admin-only)
+const allCurators = await sdk.curator.getAllCurators(accessToken);
+
+// Get all vaults per curator (admin-only)
+const curatorVaults = await sdk.curator.getAllCuratorVaults(accessToken);
+```
+
 ### Vault (`sdk.vault`)
 
-The Vault API provides access to vault information, protocol statistics, whitelisted assets, and transaction history. Most endpoints are public, but some require authentication for private vaults.
+The Vault API provides access to vault information, protocol statistics, whitelisted assets, transaction history, and curator settings. Most endpoints are public, but some require authentication for private vaults and curator operations.
 
 #### Protocol Statistics
 
@@ -450,6 +504,32 @@ pendingSummary.data.pendingRedemptions.forEach((row) => {
 - `endDate` - Filter by end date (ISO 8601 format)
 - `page` - Page number (default: 1)
 - `pageSize` - Items per page (default: 20, max: 100)
+
+#### Curator Settings (curator-only)
+
+Curators can manage transaction processing and vault SLA settings for their vaults:
+
+```typescript
+const accessToken = localStorage.getItem("accessToken");
+
+// Update transaction settings (pause, process, auto, order, threshold)
+await sdk.vault.updateTransactionSettings(accessToken, {
+  vaultKey: "yusd",
+  chainId: 1,
+  status: "PAUSE",   // or "PROCESS"
+  auto: true,        // auto pause or auto trigger
+  order: 1,          // 1=FIFO, 2=LFO, 3=SFO, 4=THRESHOLD
+  threshold: 100,    // for order=4 (THRESHOLD)
+});
+
+// Update vault SLA (redemption time and warning threshold)
+await sdk.vault.updateVaultSla(accessToken, "yusd", {
+  time: 24,      // redemption SLA in hours
+  threshold: 12,  // warning threshold in hours
+}, 1);           // chainId (optional, default 1)
+```
+
+**Vault details** (`getVaultDetails`) now includes `backingRatio`, `yieldBuffer`, and `slaWarningThreshold` when returned by the backend.
 
 ## Contract Addresses
 
@@ -858,6 +938,7 @@ yieldfi-sdk/
 ├── src/
 │   ├── api/              # API client modules
 │   │   ├── auth/         # Authentication API
+│   │   ├── curator/      # Curator API (onboarding, admin)
 │   │   └── glassbook/    # Glassbook API
 │   ├── client/           # Main SDK client
 │   ├── config/           # Configuration schemas and defaults

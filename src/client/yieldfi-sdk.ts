@@ -11,6 +11,7 @@ import { GlassbookAPI } from "../api/glassbook";
 import { VaultAPI } from "../api/vault";
 import { FormAPI } from "../api/forms";
 import { CuratorHandoffAPI } from "../api/curator-handoff";
+import { CuratorAPI } from "../api/curator";
 import { PointsAPI } from "../api/points";
 import { V3API } from "./v3";
 
@@ -60,6 +61,12 @@ export class YieldFiSDK {
      * @deprecated Use sdk.v3.curatorHandoff instead. This property will be removed in a future version.
      */
     public curatorHandoff!: CuratorHandoffAPI;
+
+    /**
+     * Curator API
+     * Curator onboarding, curator vaults, admin curator endpoints
+     */
+    public curator!: CuratorAPI;
 
     /**
      * SDK configuration
@@ -146,13 +153,16 @@ export class YieldFiSDK {
         const curatorHandoffAPI = this.container.get<CuratorHandoffAPI>(
             SERVICE_NAMES.CURATOR_HANDOFF_API,
         );
-        this.v3 = new V3API(vaultAPI, onboardingAPI, curatorHandoffAPI);
+        const curatorAPI = this.container.get<CuratorAPI>(SERVICE_NAMES.CURATOR_API);
+        this.v3 = new V3API(vaultAPI, onboardingAPI, curatorHandoffAPI, curatorAPI);
 
         // Legacy API access (deprecated - use sdk.v3.onboarding and sdk.v3.curatorHandoff instead)
         // @deprecated Use sdk.v3.onboarding instead
         this.onboarding = onboardingAPI;
         // @deprecated Use sdk.v3.curatorHandoff instead
         this.curatorHandoff = curatorHandoffAPI;
+
+        this.curator = curatorAPI;
 
         // Future extensibility:
         // - Loading remote config
@@ -265,6 +275,21 @@ export class YieldFiSDK {
             SERVICE_NAMES.CURATOR_HANDOFF_API,
             () =>
                 new CuratorHandoffAPI(
+                    this.container.get(SERVICE_NAMES.HTTP_CLIENT),
+                    this.container.get(SERVICE_NAMES.CONFIG),
+                ),
+            {
+                singleton: true,
+                lazy: false, // Actively loaded
+                dependencies: [SERVICE_NAMES.HTTP_CLIENT, SERVICE_NAMES.CONFIG],
+            },
+        );
+
+        // Register CuratorAPI (singleton, not lazy)
+        this.container.register(
+            SERVICE_NAMES.CURATOR_API,
+            () =>
+                new CuratorAPI(
                     this.container.get(SERVICE_NAMES.HTTP_CLIENT),
                     this.container.get(SERVICE_NAMES.CONFIG),
                 ),

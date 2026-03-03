@@ -15,6 +15,7 @@ export const SERVICE_NAMES = {
   VAULT_API: "vaultAPI",
   ONBOARDING_API: "onboardingAPI",
   CURATOR_HANDOFF_API: "curatorHandoffAPI",
+  CURATOR_API: "curatorAPI",
   POINTS_API: "pointsAPI",
 } as const;
 

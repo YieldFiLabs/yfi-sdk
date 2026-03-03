@@ -24,6 +24,10 @@ import {
   TransactionResponse,
   TransactionFilterOptionsResponse,
   PendingRedemptionsSummaryResponse,
+  TransactionSettingsBody,
+  TransactionSettingsResponse,
+  VaultSlaBody,
+  VaultSlaResponse,
 } from "../../types";
 
 export class VaultAPI {
@@ -554,8 +558,6 @@ export class VaultAPI {
     const queryString = queryParams.toString();
     const url = `/${this.servicePrefix}/api/vaults/transactions${queryString ? `?${queryString}` : ""}`;
 
-    console.log(url);
-
     const response = await this.httpClient.get<TransactionListResponse>(url, {
       headers: this.getAuthHeaders(accessToken),
     });
@@ -669,6 +671,53 @@ export class VaultAPI {
     const url = `/${this.servicePrefix}/api/vaults/transactions/pending-redemptions-summary`;
 
     const response = await this.httpClient.get<PendingRedemptionsSummaryResponse>(url, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  /**
+   * Update transaction settings (pause, process, auto, order, threshold)
+   * PUT /vault/api/vaults/transactions/settings
+   *
+   * @param accessToken Access token (required - must be curator)
+   * @param body Transaction settings (vaultKey, status, auto, order, threshold)
+   * @returns Updated settings
+   */
+  async updateTransactionSettings(
+    accessToken: string,
+    body: TransactionSettingsBody,
+  ): Promise<TransactionSettingsResponse> {
+    const url = `/${this.servicePrefix}/api/vaults/transactions/settings`;
+
+    const response = await this.httpClient.put<TransactionSettingsResponse>(url, body, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  /**
+   * Update vault SLA (time in hours, warning threshold)
+   * PUT /vault/api/vaults/:key/sla
+   *
+   * @param accessToken Access token (required - must be curator)
+   * @param vaultKey Vault key
+   * @param chainId Chain ID (default 1)
+   * @param body SLA settings (time, threshold)
+   * @returns Update result
+   */
+  async updateVaultSla(
+    accessToken: string,
+    vaultKey: string,
+    body: VaultSlaBody,
+    chainId: number = 1,
+  ): Promise<VaultSlaResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append("chainId", chainId.toString());
+
+    const url = `/${this.servicePrefix}/api/vaults/${vaultKey}/sla?${queryParams.toString()}`;
+
+    const response = await this.httpClient.put<VaultSlaResponse>(url, body, {
       headers: this.getAuthHeaders(accessToken),
     });
     return response;

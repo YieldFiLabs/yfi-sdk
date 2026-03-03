@@ -7,4 +7,5 @@ export * from "./glassbook";
 export * from "./vault";
 export * from "./forms";
 export * from "./curator-handoff";
+export * from "./curator";
 export * from "./points";
