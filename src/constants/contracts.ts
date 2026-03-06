@@ -17,6 +17,7 @@ export enum Chain {
   BNB = "bnb",
   AVALANCHE = "avalanche",
   TAC = "tac",
+  SEI = "sei",
 }
 
 /**
@@ -45,6 +46,7 @@ export const CHAIN_IDS: Record<Chain, string> = {
   [Chain.BNB]: "56",
   [Chain.AVALANCHE]: "43114",
   [Chain.TAC]: "239",
+  [Chain.SEI]: "1329",
 };
 
 /**
@@ -61,6 +63,7 @@ export const CHAIN_GAS_SYMBOLS: Record<Chain, string> = {
   [Chain.BNB]: "BNB",
   [Chain.AVALANCHE]: "AVAX",
   [Chain.TAC]: "TAC",
+  [Chain.SEI]: "SEI",
 };
 
 /**
@@ -187,6 +190,11 @@ export const CONTRACT_ADDRESSES: Record<Chain, ChainContracts> = {
     vyUSD: "0xF4F447E6AFa04c9D11Ef0e2fC0d7f19C24Ee55de",
   },
   [Chain.TAC]: {
+    manager: "0x03ACc35286bAAE6D73d99a9f14Ef13752208C8dC",
+    yUSD: "0x4772D2e014F9fC3a820C444e3313968e9a5C8121",
+    vyUSD: "0xF4F447E6AFa04c9D11Ef0e2fC0d7f19C24Ee55de",
+  },
+  [Chain.SEI]: {
     manager: "0x03ACc35286bAAE6D73d99a9f14Ef13752208C8dC",
     yUSD: "0x4772D2e014F9fC3a820C444e3313968e9a5C8121",
     vyUSD: "0xF4F447E6AFa04c9D11Ef0e2fC0d7f19C24Ee55de",
