@@ -443,7 +443,7 @@ export interface PendingRedemptionsSummaryResponse {
 /**
  * Redemption type options for vault redemption jobs
  */
-export type RedemptionType = 'ltoh' | 'fifo';
+export type RedemptionType = 'ltoh' | 'htol' | 'fifo';
 
 /**
  * Redemption job settings for a vault
