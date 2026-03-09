@@ -571,18 +571,28 @@ export class VaultAPI {
    * Pause a PENDING transaction
    * POST /vault/api/vaults/transactions/:id/pause
    *
-   * Requires writer+ permission on the vault.
+   * Requires writer+ permission on the vault. vaultKey and chainId are used to verify
+   * the transaction belongs to the vault and for gateway auth headers.
    *
    * @param id Transaction ID
    * @param accessToken Access token (required - must have writer+ on vault)
+   * @param vaultKey Vault key (required - from transaction's vault)
+   * @param chainId Chain ID (default 1)
    * @returns Updated transaction with status PAUSED
    */
-  async pauseTransaction(id: number, accessToken: string): Promise<TransactionResponse> {
+  async pauseTransaction(
+    id: number,
+    accessToken: string,
+    vaultKey: string,
+    chainId: number = 1,
+  ): Promise<TransactionResponse> {
     const url = `/${this.servicePrefix}/api/vaults/transactions/${id}/pause`;
 
-    const response = await this.httpClient.post<TransactionResponse>(url, {}, {
-      headers: this.getAuthHeaders(accessToken),
-    });
+    const response = await this.httpClient.post<TransactionResponse>(
+      url,
+      { vaultKey, chainId },
+      { headers: this.getAuthHeaders(accessToken) },
+    );
     return response;
   }
 
@@ -590,18 +600,28 @@ export class VaultAPI {
    * Unpause a PAUSED transaction
    * POST /vault/api/vaults/transactions/:id/unpause
    *
-   * Requires writer+ permission on the vault.
+   * Requires writer+ permission on the vault. vaultKey and chainId are used to verify
+   * the transaction belongs to the vault and for gateway auth headers.
    *
    * @param id Transaction ID
    * @param accessToken Access token (required - must have writer+ on vault)
+   * @param vaultKey Vault key (required - from transaction's vault)
+   * @param chainId Chain ID (default 1)
    * @returns Updated transaction with status PENDING
    */
-  async unpauseTransaction(id: number, accessToken: string): Promise<TransactionResponse> {
+  async unpauseTransaction(
+    id: number,
+    accessToken: string,
+    vaultKey: string,
+    chainId: number = 1,
+  ): Promise<TransactionResponse> {
     const url = `/${this.servicePrefix}/api/vaults/transactions/${id}/unpause`;
 
-    const response = await this.httpClient.post<TransactionResponse>(url, {}, {
-      headers: this.getAuthHeaders(accessToken),
-    });
+    const response = await this.httpClient.post<TransactionResponse>(
+      url,
+      { vaultKey, chainId },
+      { headers: this.getAuthHeaders(accessToken) },
+    );
     return response;
   }
 

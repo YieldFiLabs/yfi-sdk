@@ -977,12 +977,17 @@ describe("VaultAPI", () => {
 
             mockHttpClient.post.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.pauseTransaction(transactionId, testAccessToken);
+            const result = await vaultAPI.pauseTransaction(
+                transactionId,
+                testAccessToken,
+                testVaultKey,
+                testChainId,
+            );
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.post).toHaveBeenCalledWith(
                 `/vault/api/vaults/transactions/${transactionId}/pause`,
-                {},
+                { vaultKey: testVaultKey, chainId: testChainId },
                 { headers: { Authorization: `Bearer ${testAccessToken}` } },
             );
         });
@@ -1009,12 +1014,17 @@ describe("VaultAPI", () => {
 
             mockHttpClient.post.mockResolvedValue(expectedResponse);
 
-            const result = await vaultAPI.unpauseTransaction(transactionId, testAccessToken);
+            const result = await vaultAPI.unpauseTransaction(
+                transactionId,
+                testAccessToken,
+                testVaultKey,
+                testChainId,
+            );
 
             expect(result).toEqual(expectedResponse);
             expect(mockHttpClient.post).toHaveBeenCalledWith(
                 `/vault/api/vaults/transactions/${transactionId}/unpause`,
-                {},
+                { vaultKey: testVaultKey, chainId: testChainId },
                 { headers: { Authorization: `Bearer ${testAccessToken}` } },
             );
         });
