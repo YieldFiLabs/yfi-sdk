@@ -19,8 +19,6 @@ import {
     StrategiesResponse,
 } from "../../../../src/types";
 import {
-    TransactionSettingsBody,
-    TransactionSettingsResponse,
     VaultSlaBody,
     VaultSlaResponse,
 } from "../../../../src/types/curator";
@@ -1128,64 +1126,6 @@ describe("VaultAPI", () => {
                 `/vault/api/vaults/${testVaultKey}/roles/${encodeURIComponent(curatorAddress)}`,
                 { headers: { Authorization: `Bearer ${testAccessToken}` } },
             );
-        });
-    });
-
-    describe("updateTransactionSettings", () => {
-        it("should update transaction settings", async () => {
-            const body: TransactionSettingsBody = {
-                vaultKey: testVaultKey,
-                chainId: testChainId,
-                status: "PAUSE",
-                auto: true,
-                order: 1,
-                threshold: 100,
-            };
-
-            const expectedResponse: TransactionSettingsResponse = {
-                success: true,
-                settings: {
-                    vaultKey: testVaultKey,
-                    chainId: testChainId,
-                    pauseTransactions: true,
-                    autoPause: true,
-                    autoTrigger: false,
-                    processingOrder: 1,
-                    orderThreshold: "100",
-                    updatedAt: "2024-01-01T12:00:00.000Z",
-                },
-                timestamp: "2024-01-01T12:00:00.000Z",
-            };
-
-            mockHttpClient.put.mockResolvedValue(expectedResponse);
-
-            const result = await vaultAPI.updateTransactionSettings(
-                testAccessToken,
-                body,
-            );
-
-            expect(result).toEqual(expectedResponse);
-            expect(mockHttpClient.put).toHaveBeenCalledWith(
-                "/vault/api/vaults/transactions/settings",
-                body,
-                {
-                    headers: {
-                        Authorization: `Bearer ${testAccessToken}`,
-                    },
-                },
-            );
-        });
-
-        it("should throw NetworkError on failure", async () => {
-            const body: TransactionSettingsBody = {
-                vaultKey: testVaultKey,
-                status: "PROCESS",
-            };
-            mockHttpClient.put.mockRejectedValue(new NetworkError("Network error"));
-
-            await expect(
-                vaultAPI.updateTransactionSettings(testAccessToken, body),
-            ).rejects.toThrow(NetworkError);
         });
     });
 

@@ -24,8 +24,6 @@ import {
   TransactionResponse,
   TransactionFilterOptionsResponse,
   PendingRedemptionsSummaryResponse,
-  TransactionSettingsBody,
-  TransactionSettingsResponse,
   VaultSlaBody,
   VaultSlaResponse,
   VaultRoleListResponse,
@@ -829,26 +827,6 @@ export class VaultAPI {
         headers: this.getAuthHeaders(accessToken),
       },
     );
-    return response;
-  }
-
-  /**
-   * Update transaction settings (pause, process, auto, order, threshold)
-   * PUT /vault/api/vaults/transactions/settings
-   *
-   * @param accessToken Access token (required - must be curator)
-   * @param body Transaction settings (vaultKey, status, auto, order, threshold)
-   * @returns Updated settings
-   */
-  async updateTransactionSettings(
-    accessToken: string,
-    body: TransactionSettingsBody,
-  ): Promise<TransactionSettingsResponse> {
-    const url = `/${this.servicePrefix}/api/vaults/transactions/settings`;
-
-    const response = await this.httpClient.put<TransactionSettingsResponse>(url, body, {
-      headers: this.getAuthHeaders(accessToken),
-    });
     return response;
   }
 

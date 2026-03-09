@@ -12,8 +12,7 @@ Official YieldFi SDK for interacting with YieldFi services through the gateway.
   - `getAllCurators()` - List all curators (admin)
   - `getAllCuratorVaults()` - List vaults grouped by curator (admin)
 
-- **Vault API - Curator Settings**: Transaction and SLA management for curators
-  - `updateTransactionSettings()` - Pause/process, auto pause/trigger, processing order
+- **Vault API - Curator Settings**: SLA management for curators
   - `updateVaultSla()` - Set redemption SLA and warning threshold
   - `getVaultDetails()` - Now includes `backingRatio`, `yieldBuffer`, `slaWarningThreshold`
 
@@ -507,20 +506,10 @@ pendingSummary.data.pendingRedemptions.forEach((row) => {
 
 #### Curator Settings (curator-only)
 
-Curators can manage transaction processing and vault SLA settings for their vaults:
+Curators can manage vault SLA settings for their vaults:
 
 ```typescript
 const accessToken = localStorage.getItem("accessToken");
-
-// Update transaction settings (pause, process, auto, order, threshold)
-await sdk.vault.updateTransactionSettings(accessToken, {
-  vaultKey: "yusd",
-  chainId: 1,
-  status: "PAUSE",   // or "PROCESS"
-  auto: true,        // auto pause or auto trigger
-  order: 1,          // 1=FIFO, 2=LFO, 3=SFO, 4=THRESHOLD
-  threshold: 100,    // for order=4 (THRESHOLD)
-});
 
 // Update vault SLA (redemption time and warning threshold)
 await sdk.vault.updateVaultSla(accessToken, "yusd", {

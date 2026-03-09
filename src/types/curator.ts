@@ -48,30 +48,6 @@ export interface CuratorVaultsResponse {
   }>;
 }
 
-export interface TransactionSettingsBody {
-  vaultKey: string;
-  chainId?: number;
-  status?: "PAUSE" | "PROCESS";
-  auto?: boolean;
-  order?: number;
-  threshold?: number;
-}
-
-export interface TransactionSettingsResponse {
-  success: boolean;
-  settings: {
-    vaultKey: string;
-    chainId: number;
-    pauseTransactions: boolean;
-    autoPause: boolean;
-    autoTrigger: boolean;
-    processingOrder: number;
-    orderThreshold: string | null;
-    updatedAt: string;
-  };
-  timestamp: string;
-}
-
 export interface VaultSlaBody {
   time?: number;
   threshold?: number;
