@@ -718,6 +718,24 @@ export class VaultAPI {
   }
 
   /**
+   * Get list of vault keys that have roles in curator_vault_roles
+   * GET /vault/api/vaults/roles/vaults
+   *
+   * Requires authentication.
+   *
+   * @param accessToken Access token (required)
+   * @returns List of vault keys with roles
+   */
+  async getVaultsWithRoles(accessToken: string): Promise<{ success: boolean; data: string[] }> {
+    const url = `/${this.servicePrefix}/api/vaults/roles/vaults`;
+
+    const response = await this.httpClient.get<{ success: boolean; data: string[] }>(url, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  /**
    * Get vault roles (curator addresses and their roles)
    * GET /vault/api/vaults/:vaultKey/roles
    *

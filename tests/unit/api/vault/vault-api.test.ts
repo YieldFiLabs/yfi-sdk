@@ -1020,6 +1020,25 @@ describe("VaultAPI", () => {
         });
     });
 
+    describe("getVaultsWithRoles", () => {
+        it("should get list of vault keys with roles", async () => {
+            const expectedResponse = {
+                success: true,
+                data: ["yusd", "ybtc"],
+            };
+
+            mockHttpClient.get.mockResolvedValue(expectedResponse);
+
+            const result = await vaultAPI.getVaultsWithRoles(testAccessToken);
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.get).toHaveBeenCalledWith(
+                "/vault/api/vaults/roles/vaults",
+                { headers: { Authorization: `Bearer ${testAccessToken}` } },
+            );
+        });
+    });
+
     describe("getVaultRoles", () => {
         it("should get vault roles", async () => {
             const expectedResponse = {
