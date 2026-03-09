@@ -12,9 +12,34 @@ Official YieldFi SDK for interacting with YieldFi services through the gateway.
   - `getAllCurators()` - List all curators (admin)
   - `getAllCuratorVaults()` - List vaults grouped by curator (admin)
 
-- **Vault API - Curator Settings**: SLA management for curators
+- **Vault API - Curator Settings**: SLA management and vault roles for curators
   - `updateVaultSla()` - Set redemption SLA and warning threshold
+  - `getVaultsWithRoles()` - List vault keys that have roles
+  - `getVaultRoles()` - Get roles for a vault (reader+)
+  - `addOrUpdateVaultRole()` - Add or update role (admin)
+  - `removeVaultRole()` - Remove role (admin)
+  - `pauseTransaction()` / `unpauseTransaction()` - Pause/unpause pending transactions (writer+)
   - `getVaultDetails()` - Now includes `backingRatio`, `yieldBuffer`, `slaWarningThreshold`
+
+- **Points API** (`sdk.points`): User points and balances
+  - `getUserPoints()` - Get user's total points and protocol breakdown
+  - `getUserBalances()` - Get user balances by protocol and chain
+  - `getProtocolPoints()` - Get protocol points/leaderboard
+
+- **Forms API** (`sdk.forms`): Curator forms and onboarding
+  - `getActiveForms()` / `getFormById()` - List and fetch forms
+  - `createForm()` / `createStage()` / `createStep()` - Create form structure (admin)
+  - `createInstance()` / `updateInstance()` - Manage form instances
+  - `saveStepResponse()` / `submitStepResponse()` - Submit form responses
+  - `approveStepResponse()` - Approve step (admin)
+
+- **Curator Handoff API** (`sdk.curatorHandoff`): Transfer curator ownership
+  - `getCuratorByKey()` - Get curator by key
+  - `transferCuratorAddress()` - Transfer curator to new address
+
+- **Auth - Google OAuth**: `getGoogleLoginUrl()`, `exchangeGoogleAuthCode()`
+
+- **Glassbook - Prices**: `getLatestPrice()`, `getPrices()`, `getPriceById()`
 
 ### New Features (0.3.0)
 
@@ -135,8 +160,11 @@ localStorage.removeItem("user");
 
 - **Authentication** (`sdk.auth`) - User authentication via wallet signatures
 - **Curator** (`sdk.curator`) - Curator onboarding and admin endpoints
-- **Glassbook** (`sdk.glassbook`) - Partner transactions and referrals
-- **Vault** (`sdk.vault`) - Vault info, protocol stats, whitelisted assets, transactions, curator settings
+- **Glassbook** (`sdk.glassbook`) - Partner transactions, referrals, and prices
+- **Vault** (`sdk.vault`) - Vault info, protocol stats, whitelisted assets, transactions, curator settings, vault roles
+- **Points** (`sdk.points`) - User points, balances, and protocol points
+- **Forms** (`sdk.forms` / `sdk.onboarding`) - Curator forms, onboarding, and form instances
+- **Curator Handoff** (`sdk.curatorHandoff`) - Curator address transfer
 
 ### Authentication (`sdk.auth`)
 
@@ -167,6 +195,26 @@ const newTokens = await sdk.auth.refresh({
 
 // 4. Logout (revokes all tokens)
 await sdk.auth.logout(accessToken);
+```
+
+#### Google OAuth
+
+```typescript
+// Get Google login URL (redirect user to this URL)
+const loginUrl = await sdk.auth.getGoogleLoginUrl({
+  redirectUri: 'https://yourapp.com/auth/callback',
+  state: 'optional-state-data',
+});
+
+// After user redirects back with ?code=..., exchange the code for tokens
+const authResponse = await sdk.auth.exchangeGoogleAuthCode({
+  code: 'google-auth-code',
+  redirectUri: 'https://yourapp.com/auth/callback',
+});
+
+// Store tokens
+localStorage.setItem('accessToken', authResponse.accessToken);
+localStorage.setItem('refreshToken', authResponse.refreshToken);
 ```
 
 #### User Consent Management
@@ -298,6 +346,46 @@ const referralByAddress = await sdk.glassbook.getReferralByAddress(
   accessToken,
   "0x..."
 );
+
+// Update referral code for an address
+await sdk.glassbook.updateReferralCode(accessToken, "0x...", {
+  code: "NEWCODE123",
+});
+
+// Get referral stats for an address
+const stats = await sdk.glassbook.getReferralStats(accessToken, "0x...");
+
+// Get referred addresses by address (paginated)
+const referred = await sdk.glassbook.getReferredAddressesByAddress(
+  accessToken,
+  "0x...",
+  1,  // page
+  10  // pageSize
+);
+```
+
+#### Prices
+
+```typescript
+// Get latest price by symbol
+const price = await sdk.glassbook.getLatestPrice("yUSD");
+
+// Get latest price by source
+const priceBySource = await sdk.glassbook.getLatestPriceBySource(
+  "yUSD",
+  "source-id"
+);
+
+// Get prices with filters
+const prices = await sdk.glassbook.getPrices({
+  symbols: ["yUSD", "yBTC"],
+  chainId: 1,
+  limit: 100,
+  offset: 0,
+});
+
+// Get price by ID
+const priceById = await sdk.glassbook.getPriceById(123);
 ```
 
 ### Curator (`sdk.curator`)
@@ -334,6 +422,98 @@ const allCurators = await sdk.curator.getAllCurators(accessToken);
 
 // Get all vaults per curator (admin-only)
 const curatorVaults = await sdk.curator.getAllCuratorVaults(accessToken);
+```
+
+### Points (`sdk.points`)
+
+The Points API provides access to user points, balances, and protocol points. **Optional authentication** for some endpoints.
+
+```typescript
+const accessToken = localStorage.getItem("accessToken");
+
+// Get user's total points and breakdown by protocol
+const points = await sdk.points.getUserPoints("0x...", accessToken);
+console.log(`Total points: ${points.totalPoints}`);
+console.log("By protocol:", points.protocols);
+
+// Get user balances by protocol and chain
+const balances = await sdk.points.getUserBalances(
+  "0x...",
+  accessToken,
+  "1" // optional chainId filter
+);
+
+// Get protocol points (leaderboard)
+const protocolPoints = await sdk.points.getProtocolPoints(
+  "my-protocol",
+  accessToken,
+  {
+    limit: 50,
+    offset: 0,
+    chainId: "1",
+    tokenAddress: "0x...",
+  }
+);
+```
+
+### Forms / Onboarding (`sdk.forms` or `sdk.onboarding`)
+
+The Forms API handles curator forms, onboarding, and form instances. **All endpoints require authentication.**
+
+```typescript
+const accessToken = localStorage.getItem("accessToken");
+
+// Get active forms
+const forms = await sdk.forms.getActiveForms(accessToken);
+
+// Get form by ID
+const form = await sdk.forms.getFormById(accessToken, "form-id");
+
+// Admin: get all forms (including inactive)
+const adminForms = await sdk.forms.getActiveFormsAdmin(accessToken);
+
+// Create form, stage, step (admin)
+const form = await sdk.forms.createForm(accessToken, { name: "Onboarding", ... });
+const stage = await sdk.forms.createStage(accessToken, { formId: form.id, ... });
+const step = await sdk.forms.createStep(accessToken, { stageId: stage.id, ... });
+
+// Approve step response (admin)
+await sdk.forms.approveStepResponse(accessToken, instanceId, stepId, body);
+
+// Get curator instances and metrics
+const instances = await sdk.forms.getInstancesByCurator(accessToken, curatorKey);
+const metrics = await sdk.forms.getCuratorMetrics(accessToken, curatorKey);
+
+// Create instance, update instance
+const instance = await sdk.forms.createInstance(accessToken, body);
+await sdk.forms.updateInstance(accessToken, instanceId, body);
+
+// Save step response (draft)
+await sdk.forms.saveStepResponse(accessToken, instanceId, stepId, body);
+
+// Submit step response
+await sdk.forms.submitStepResponse(accessToken, instanceId, stepId, body);
+
+// Get step response
+const response = await sdk.forms.getStepResponse(accessToken, instanceId, stepId);
+```
+
+### Curator Handoff (`sdk.curatorHandoff`)
+
+Transfer curator address to a new owner. **Requires authentication.**
+
+```typescript
+const accessToken = localStorage.getItem("accessToken");
+
+// Get curator by key (verify current address)
+const curator = await sdk.curatorHandoff.getCuratorByKey("yieldfi", accessToken);
+
+// Transfer curator address to new address
+await sdk.curatorHandoff.transferCuratorAddress(
+  "yieldfi",
+  { newAddress: "0x1234..." },
+  accessToken
+);
 ```
 
 ### Vault (`sdk.vault`)
@@ -503,6 +683,50 @@ pendingSummary.data.pendingRedemptions.forEach((row) => {
 - `endDate` - Filter by end date (ISO 8601 format)
 - `page` - Page number (default: 1)
 - `pageSize` - Items per page (default: 20, max: 100)
+
+#### Vault Roles (curator-only)
+
+Curators with reader+ permission can view and manage vault roles. Admins can add, update, and remove roles.
+
+```typescript
+const accessToken = localStorage.getItem("accessToken");
+
+// Get list of vault keys that have roles
+const { data: vaultKeys } = await sdk.vault.getVaultsWithRoles(accessToken);
+
+// Get roles for a vault (requires reader+ on vault)
+const roles = await sdk.vault.getVaultRoles("yusd", accessToken);
+
+// Add or update role (requires admin on vault)
+await sdk.vault.addOrUpdateVaultRole(
+  "yusd",
+  { curatorAddress: "0x...", role: "writer" },
+  accessToken
+);
+
+// Remove role (requires admin on vault)
+await sdk.vault.removeVaultRole(
+  "yusd",
+  "0x...",
+  accessToken
+);
+```
+
+**Roles:** `admin` (full control), `writer` (can pause/unpause, update SLA), `reader` (view only).
+
+#### Transaction Pause/Unpause (curator writer+)
+
+Curators with writer or admin permission can pause and unpause pending transactions:
+
+```typescript
+const accessToken = localStorage.getItem("accessToken");
+
+// Pause a PENDING transaction
+await sdk.vault.pauseTransaction(transactionId, accessToken, "yusd", 1);
+
+// Unpause a PAUSED transaction
+await sdk.vault.unpauseTransaction(transactionId, accessToken, "yusd", 1);
+```
 
 #### Curator Settings (curator-only)
 
@@ -928,7 +1152,11 @@ yieldfi-sdk/
 │   ├── api/              # API client modules
 │   │   ├── auth/         # Authentication API
 │   │   ├── curator/      # Curator API (onboarding, admin)
-│   │   └── glassbook/    # Glassbook API
+│   │   ├── curator-handoff/  # Curator Handoff API
+│   │   ├── forms/        # Forms API (onboarding, admin)
+│   │   ├── glassbook/    # Glassbook API
+│   │   ├── points/       # Points API
+│   │   └── vault/        # Vault API
 │   ├── client/           # Main SDK client
 │   ├── config/           # Configuration schemas and defaults
 │   ├── constants/        # Contract addresses and token constants
