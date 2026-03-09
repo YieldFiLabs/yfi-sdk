@@ -956,6 +956,152 @@ describe("VaultAPI", () => {
         });
     });
 
+    describe("pauseTransaction", () => {
+        it("should pause a PENDING transaction", async () => {
+            const transactionId = 123;
+            const expectedResponse = {
+                success: true,
+                transaction: {
+                    id: transactionId,
+                    chainId: testChainId,
+                    txnHash: "0xabc",
+                    type: "deposit" as const,
+                    vaultAddress: testVaultAddress,
+                    userAddress: "0x123",
+                    assetAddress: testAssetAddress,
+                    status: "PAUSED" as const,
+                    createdAt: "2024-01-01T12:00:00.000Z",
+                    updatedAt: "2024-01-01T12:00:00.000Z",
+                },
+            };
+
+            mockHttpClient.post.mockResolvedValue(expectedResponse);
+
+            const result = await vaultAPI.pauseTransaction(transactionId, testAccessToken);
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.post).toHaveBeenCalledWith(
+                `/vault/api/vaults/transactions/${transactionId}/pause`,
+                {},
+                { headers: { Authorization: `Bearer ${testAccessToken}` } },
+            );
+        });
+    });
+
+    describe("unpauseTransaction", () => {
+        it("should unpause a PAUSED transaction", async () => {
+            const transactionId = 456;
+            const expectedResponse = {
+                success: true,
+                transaction: {
+                    id: transactionId,
+                    chainId: testChainId,
+                    txnHash: "0xdef",
+                    type: "redemption" as const,
+                    vaultAddress: testVaultAddress,
+                    userAddress: "0x456",
+                    assetAddress: testAssetAddress,
+                    status: "PENDING" as const,
+                    createdAt: "2024-01-01T12:00:00.000Z",
+                    updatedAt: "2024-01-01T12:00:00.000Z",
+                },
+            };
+
+            mockHttpClient.post.mockResolvedValue(expectedResponse);
+
+            const result = await vaultAPI.unpauseTransaction(transactionId, testAccessToken);
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.post).toHaveBeenCalledWith(
+                `/vault/api/vaults/transactions/${transactionId}/unpause`,
+                {},
+                { headers: { Authorization: `Bearer ${testAccessToken}` } },
+            );
+        });
+    });
+
+    describe("getVaultRoles", () => {
+        it("should get vault roles", async () => {
+            const expectedResponse = {
+                success: true,
+                data: [
+                    {
+                        curatorAddress: "0x1234567890123456789012345678901234567890",
+                        vaultKey: testVaultKey,
+                        role: "admin" as const,
+                        createdAt: "2024-01-01T12:00:00.000Z",
+                        updatedAt: "2024-01-01T12:00:00.000Z",
+                    },
+                ],
+            };
+
+            mockHttpClient.get.mockResolvedValue(expectedResponse);
+
+            const result = await vaultAPI.getVaultRoles(testVaultKey, testAccessToken);
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.get).toHaveBeenCalledWith(
+                `/vault/api/vaults/${testVaultKey}/roles`,
+                { headers: { Authorization: `Bearer ${testAccessToken}` } },
+            );
+        });
+    });
+
+    describe("addOrUpdateVaultRole", () => {
+        it("should add or update vault role", async () => {
+            const body = {
+                curatorAddress: "0x1234567890123456789012345678901234567890",
+                role: "writer" as const,
+            };
+            const expectedResponse = {
+                success: true,
+                data: {
+                    curatorAddress: body.curatorAddress,
+                    vaultKey: testVaultKey,
+                    role: "writer" as const,
+                    createdAt: "2024-01-01T12:00:00.000Z",
+                    updatedAt: "2024-01-01T12:00:00.000Z",
+                },
+            };
+
+            mockHttpClient.put.mockResolvedValue(expectedResponse);
+
+            const result = await vaultAPI.addOrUpdateVaultRole(
+                testVaultKey,
+                body,
+                testAccessToken,
+            );
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.put).toHaveBeenCalledWith(
+                `/vault/api/vaults/${testVaultKey}/roles`,
+                body,
+                { headers: { Authorization: `Bearer ${testAccessToken}` } },
+            );
+        });
+    });
+
+    describe("removeVaultRole", () => {
+        it("should remove vault role", async () => {
+            const curatorAddress = "0x1234567890123456789012345678901234567890";
+            const expectedResponse = { success: true, message: "Role removed successfully" };
+
+            mockHttpClient.delete.mockResolvedValue(expectedResponse);
+
+            const result = await vaultAPI.removeVaultRole(
+                testVaultKey,
+                curatorAddress,
+                testAccessToken,
+            );
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.delete).toHaveBeenCalledWith(
+                `/vault/api/vaults/${testVaultKey}/roles/${encodeURIComponent(curatorAddress)}`,
+                { headers: { Authorization: `Bearer ${testAccessToken}` } },
+            );
+        });
+    });
+
     describe("updateTransactionSettings", () => {
         it("should update transaction settings", async () => {
             const body: TransactionSettingsBody = {

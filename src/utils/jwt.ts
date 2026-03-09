@@ -47,6 +47,28 @@ export interface JWTPayload {
    * Token type
    */
   type?: string;
+
+  /**
+   * Curator info with vault-specific roles
+   */
+  curator?: {
+    id?: string;
+    key?: string;
+    name?: string;
+    address?: string;
+    websiteUrl?: string;
+    vault?: string;
+    vaultRoles?: Array<{
+      vaultKey: string;
+      address: string;
+      role: "admin" | "writer" | "reader";
+    }>;
+  };
+
+  /**
+   * Backend role (e.g. "curator" when user has vault roles)
+   */
+  beRole?: string;
 }
 
 /**

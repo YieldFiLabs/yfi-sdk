@@ -321,7 +321,7 @@ export interface TransactionFilters extends PaginationParams {
   receiverAddress?: string;
   assetAddress?: string;
   type?: 'deposit' | 'redemption';
-  status?: 'PENDING' | 'PROCESSED' | 'CANCELLED' | 'NO-RETRY' | 'FAILED';
+  status?: 'PENDING' | 'PROCESSED' | 'CANCELLED' | 'NO-RETRY' | 'FAILED' | 'PAUSED';
   startDate?: string; // ISO 8601 date string
   endDate?: string; // ISO 8601 date string
 }
@@ -338,7 +338,7 @@ export interface Transaction {
   userAddress: string;
   receiverAddress?: string | null;
   assetAddress: string;
-  status: 'PENDING' | 'PROCESSED' | 'CANCELLED' | 'NO-RETRY' | 'FAILED';
+  status: 'PENDING' | 'PROCESSED' | 'CANCELLED' | 'NO-RETRY' | 'FAILED' | 'PAUSED';
   queueIndex?: number | null;
   assetAmount?: string | null;
   sharesAmount?: string | null;
@@ -379,6 +379,43 @@ export interface TransactionFilterOptionsResponse {
     statuses: string[];
     types: string[];
   };
+}
+
+/**
+ * Curator vault role (admin/writer/reader per vault)
+ */
+export type CuratorVaultRoleType = 'admin' | 'writer' | 'reader';
+
+export interface CuratorVaultRole {
+  curatorAddress: string;
+  vaultKey: string;
+  role: CuratorVaultRoleType;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Vault role list response
+ */
+export interface VaultRoleListResponse {
+  success: boolean;
+  data: CuratorVaultRole[];
+}
+
+/**
+ * Add or update vault role request
+ */
+export interface AddOrUpdateVaultRoleRequest {
+  curatorAddress: string;
+  role: CuratorVaultRoleType;
+}
+
+/**
+ * Add or update vault role response
+ */
+export interface AddOrUpdateVaultRoleResponse {
+  success: boolean;
+  data: CuratorVaultRole;
 }
 
 /**

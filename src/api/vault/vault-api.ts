@@ -28,6 +28,9 @@ import {
   TransactionSettingsResponse,
   VaultSlaBody,
   VaultSlaResponse,
+  VaultRoleListResponse,
+  AddOrUpdateVaultRoleRequest,
+  AddOrUpdateVaultRoleResponse,
 } from "../../types";
 
 export class VaultAPI {
@@ -565,6 +568,44 @@ export class VaultAPI {
   }
 
   /**
+   * Pause a PENDING transaction
+   * POST /vault/api/vaults/transactions/:id/pause
+   *
+   * Requires writer+ permission on the vault.
+   *
+   * @param id Transaction ID
+   * @param accessToken Access token (required - must have writer+ on vault)
+   * @returns Updated transaction with status PAUSED
+   */
+  async pauseTransaction(id: number, accessToken: string): Promise<TransactionResponse> {
+    const url = `/${this.servicePrefix}/api/vaults/transactions/${id}/pause`;
+
+    const response = await this.httpClient.post<TransactionResponse>(url, {}, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  /**
+   * Unpause a PAUSED transaction
+   * POST /vault/api/vaults/transactions/:id/unpause
+   *
+   * Requires writer+ permission on the vault.
+   *
+   * @param id Transaction ID
+   * @param accessToken Access token (required - must have writer+ on vault)
+   * @returns Updated transaction with status PENDING
+   */
+  async unpauseTransaction(id: number, accessToken: string): Promise<TransactionResponse> {
+    const url = `/${this.servicePrefix}/api/vaults/transactions/${id}/unpause`;
+
+    const response = await this.httpClient.post<TransactionResponse>(url, {}, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  /**
    * Get transaction by ID
    * GET /vault/api/vaults/transactions/:id
    *
@@ -673,6 +714,83 @@ export class VaultAPI {
     const response = await this.httpClient.get<PendingRedemptionsSummaryResponse>(url, {
       headers: this.getAuthHeaders(accessToken),
     });
+    return response;
+  }
+
+  /**
+   * Get vault roles (curator addresses and their roles)
+   * GET /vault/api/vaults/:vaultKey/roles
+   *
+   * Requires reader+ permission on the vault.
+   * Roles are per vault_key (chain_id not used).
+   *
+   * @param vaultKey Vault key (e.g., 'yusd', 'ybtc')
+   * @param accessToken Access token (required - must have reader+ on vault)
+   * @returns List of roles for the vault
+   */
+  async getVaultRoles(vaultKey: string, accessToken: string): Promise<VaultRoleListResponse> {
+    const url = `/${this.servicePrefix}/api/vaults/${vaultKey}/roles`;
+
+    const response = await this.httpClient.get<VaultRoleListResponse>(url, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  /**
+   * Add or update vault role for a curator address
+   * PUT /vault/api/vaults/:vaultKey/roles
+   *
+   * Requires admin permission on the vault.
+   * Roles are per vault_key (chain_id not used).
+   *
+   * @param vaultKey Vault key (e.g., 'yusd', 'ybtc')
+   * @param body Role data (curatorAddress, role)
+   * @param accessToken Access token (required - must be admin on vault)
+   * @returns Updated role
+   */
+  async addOrUpdateVaultRole(
+    vaultKey: string,
+    body: AddOrUpdateVaultRoleRequest,
+    accessToken: string,
+  ): Promise<AddOrUpdateVaultRoleResponse> {
+    const url = `/${this.servicePrefix}/api/vaults/${vaultKey}/roles`;
+
+    const response = await this.httpClient.put<AddOrUpdateVaultRoleResponse>(
+      url,
+      body,
+      {
+        headers: this.getAuthHeaders(accessToken),
+      },
+    );
+    return response;
+  }
+
+  /**
+   * Remove vault role for a curator address
+   * DELETE /vault/api/vaults/:vaultKey/roles/:curatorAddress
+   *
+   * Requires admin permission on the vault.
+   * Roles are per vault_key (chain_id not used).
+   *
+   * @param vaultKey Vault key (e.g., 'yusd', 'ybtc')
+   * @param curatorAddress Curator address to remove
+   * @param accessToken Access token (required - must be admin on vault)
+   * @returns Success response
+   */
+  async removeVaultRole(
+    vaultKey: string,
+    curatorAddress: string,
+    accessToken: string,
+  ): Promise<{ success: boolean; message: string }> {
+    const url = `/${this.servicePrefix}/api/vaults/${vaultKey}/roles/${encodeURIComponent(curatorAddress)}`;
+
+    const response = await this.httpClient.delete<{ success: boolean; message: string }>(
+      url,
+      {
+        headers: this.getAuthHeaders(accessToken),
+      },
+    );
     return response;
   }
 
