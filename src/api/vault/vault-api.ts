@@ -29,6 +29,10 @@ import {
   VaultRoleListResponse,
   AddOrUpdateVaultRoleRequest,
   AddOrUpdateVaultRoleResponse,
+  AllRedemptionJobSettingsResponse,
+  RedemptionJobSettingsResponse,
+  UpdateRedemptionJobSettingsRequest,
+  UpdateRedemptionJobSettingsResponse,
 } from "../../types";
 
 export class VaultAPI {
@@ -852,6 +856,61 @@ export class VaultAPI {
     const url = `/${this.servicePrefix}/api/vaults/${vaultKey}/sla?${queryParams.toString()}`;
 
     const response = await this.httpClient.put<VaultSlaResponse>(url, body, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  // ==================== REDEMPTION JOB SETTINGS ENDPOINTS ====================
+
+  /**
+   * Get redemption job settings for all vaults
+   * GET /vault/api/vaults/settings
+   * Requires: curator or admin role
+   */
+  async getAllVaultSettings(accessToken: string): Promise<AllRedemptionJobSettingsResponse> {
+    const url = `/${this.servicePrefix}/api/vaults/settings`;
+
+    const response = await this.httpClient.get<AllRedemptionJobSettingsResponse>(url, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  /**
+   * Get redemption job settings for a specific vault
+   * GET /vault/api/vaults/:key/settings
+   * Requires: curator or admin role
+   */
+  async getVaultSettings(
+    vaultKey: string,
+    chainId: number,
+    accessToken: string,
+  ): Promise<RedemptionJobSettingsResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append("chainId", chainId.toString());
+
+    const url = `/${this.servicePrefix}/api/vaults/${vaultKey}/settings?${queryParams.toString()}`;
+
+    const response = await this.httpClient.get<RedemptionJobSettingsResponse>(url, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  /**
+   * Update redemption job settings for a specific vault
+   * PUT /vault/api/vaults/:key/settings
+   * Requires: writer or admin role on the vault
+   */
+  async updateVaultSettings(
+    vaultKey: string,
+    body: UpdateRedemptionJobSettingsRequest,
+    accessToken: string,
+  ): Promise<UpdateRedemptionJobSettingsResponse> {
+    const url = `/${this.servicePrefix}/api/vaults/${vaultKey}/settings`;
+
+    const response = await this.httpClient.put<UpdateRedemptionJobSettingsResponse>(url, body, {
       headers: this.getAuthHeaders(accessToken),
     });
     return response;

@@ -440,3 +440,56 @@ export interface PendingRedemptionsSummaryResponse {
   };
 }
 
+/**
+ * Redemption type options for vault redemption jobs
+ */
+export type RedemptionType = 'ltoh' | 'fifo';
+
+/**
+ * Redemption job settings for a vault
+ */
+export interface RedemptionJobSettings {
+  id: number;
+  vaultKey: string;
+  chainId: number;
+  enabled: boolean;
+  intervalSeconds: number;
+  redemptionType: RedemptionType;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Response for GET /api/vaults/settings - all vault redemption job settings
+ */
+export interface AllRedemptionJobSettingsResponse {
+  success: boolean;
+  data: RedemptionJobSettings[];
+}
+
+/**
+ * Response for GET /api/vaults/:key/settings - per-vault redemption job settings
+ */
+export interface RedemptionJobSettingsResponse {
+  success: boolean;
+  data: RedemptionJobSettings | null;
+}
+
+/**
+ * Request body for PUT /api/vaults/:key/settings - update redemption job settings
+ */
+export interface UpdateRedemptionJobSettingsRequest {
+  chainId: number;
+  enabled?: boolean;
+  intervalSeconds?: number;
+  redemptionType?: RedemptionType;
+}
+
+/**
+ * Response for PUT /api/vaults/:key/settings - updated redemption job settings
+ */
+export interface UpdateRedemptionJobSettingsResponse {
+  success: boolean;
+  data: RedemptionJobSettings;
+}
+
