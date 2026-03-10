@@ -449,14 +449,15 @@ export type RedemptionType = 'ltoh' | 'htol' | 'fifo';
  * Redemption job settings for a vault
  */
 export interface RedemptionJobSettings {
-  id: number;
+  id?: number;
   vaultKey: string;
+  vaultAddress?: string;
   chainId: number;
   enabled: boolean;
   intervalSeconds: number;
   redemptionType: RedemptionType;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 /**
@@ -469,10 +470,11 @@ export interface AllRedemptionJobSettingsResponse {
 
 /**
  * Response for GET /api/vaults/:key/settings - per-vault redemption job settings
+ * API returns an array (0 or more items when chainId provided, all matching when not)
  */
 export interface RedemptionJobSettingsResponse {
   success: boolean;
-  data: RedemptionJobSettings | null;
+  data: RedemptionJobSettings[];
 }
 
 /**
