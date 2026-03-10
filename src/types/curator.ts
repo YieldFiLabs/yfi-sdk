@@ -40,6 +40,7 @@ export interface CuratorVaultsResponse {
     id: string;
     vaultKey: string;
     address: string;
+    registry?: string | null;
     chainId: number;
     symbol: string | null;
     name: string | null;
@@ -85,6 +86,7 @@ export interface AllCuratorVaultsResponse {
     vaults: Array<{
       vaultKey: string;
       address: string;
+      registry?: string | null;
       chainId: number;
       symbol: string | null;
       name: string | null;

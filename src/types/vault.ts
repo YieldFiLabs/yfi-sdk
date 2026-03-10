@@ -29,6 +29,7 @@ export interface VaultRewardDetail {
 export interface VaultListItem {
   vaultKey: string;
   address: string;
+  registry?: string | null;
   chainId: number;
   symbol: string | null;
   name: string | null;
@@ -138,6 +139,7 @@ export interface VaultFaq {
 export interface Vault {
   vaultKey: string;
   address: string;
+  registry?: string | null;
   chainId: number;
   symbol: string | null;
   name: string | null;
@@ -180,6 +182,7 @@ export interface ProtocolStats {
  */
 export interface VaultDetails {
   vaultAddress: string;
+  registry?: string | null;
   chainId: number;
   strategy: string | null;
   priceUpdateFrequency: string | null;
