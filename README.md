@@ -4,6 +4,15 @@ Official YieldFi SDK for interacting with YieldFi services through the gateway.
 
 ## Version 0.3.x
 
+### New Features (0.3.15)
+
+- **Forms API - Vault-scoped instances**: Instances are now keyed by `vaultKey` instead of `curatorKey`
+  - `getInstancesByVault(vaultKey, accessToken, status?)` - List instances for a vault
+  - `getVaultMetrics(vaultKey, accessToken)` - Instance metrics per vault
+  - `createInstance(vaultKey, { formId }, accessToken)` - Create instance for a vault
+  - `getInstances(accessToken, { vaultKey?, status? })` - Admin: list all instances with optional filters
+  - `approveFormInstance(instanceId, { approved, rejectionReason?, comments? }, accessToken)` - Admin: approve/reject entire form
+
 ### New Features (0.3.6+)
 
 - **Curator API** (`sdk.curator`): Curator onboarding and admin endpoints
@@ -26,12 +35,14 @@ Official YieldFi SDK for interacting with YieldFi services through the gateway.
   - `getUserBalances()` - Get user balances by protocol and chain
   - `getProtocolPoints()` - Get protocol points/leaderboard
 
-- **Forms API** (`sdk.forms`): Curator forms and onboarding
+- **Forms API** (`sdk.forms`): Vault-scoped forms (onboarding, vault requests, etc.)
   - `getActiveForms()` / `getFormById()` - List and fetch forms
-  - `createForm()` / `createStage()` / `createStep()` - Create form structure (admin)
-  - `createInstance()` / `updateInstance()` - Manage form instances
+  - `getInstancesByVault()` / `getVaultMetrics()` - Instances and metrics per vault
+  - `createInstance()` / `updateInstance()` - Manage form instances (vault-scoped)
   - `saveStepResponse()` / `submitStepResponse()` - Submit form responses
   - `approveStepResponse()` - Approve step (admin)
+  - `getInstances()` - List all instances with filters (admin)
+  - `approveFormInstance()` - Approve/reject entire form instance (admin)
 
 - **Curator Handoff API** (`sdk.curatorHandoff`): Transfer curator ownership
   - `getCuratorByKey()` - Get curator by key
@@ -163,7 +174,7 @@ localStorage.removeItem("user");
 - **Glassbook** (`sdk.glassbook`) - Partner transactions, referrals, and prices
 - **Vault** (`sdk.vault`) - Vault info, protocol stats, whitelisted assets, transactions, curator settings, vault roles
 - **Points** (`sdk.points`) - User points, balances, and protocol points
-- **Forms** (`sdk.forms` / `sdk.onboarding`) - Curator forms, onboarding, and form instances
+- **Forms** (`sdk.forms` / `sdk.onboarding`) - Vault-scoped forms and form instances
 - **Curator Handoff** (`sdk.curatorHandoff`) - Curator address transfer
 
 ### Authentication (`sdk.auth`)
@@ -456,9 +467,9 @@ const protocolPoints = await sdk.points.getProtocolPoints(
 );
 ```
 
-### Forms / Onboarding (`sdk.forms` or `sdk.onboarding`)
+### Forms (`sdk.forms` or `sdk.onboarding`)
 
-The Forms API handles curator forms, onboarding, and form instances. **All endpoints require authentication.**
+The Forms API handles vault-scoped forms (onboarding, vault requests, etc.). **All endpoints require authentication.** Instances are scoped by vault key.
 
 ```typescript
 const accessToken = localStorage.getItem("accessToken");
@@ -467,35 +478,44 @@ const accessToken = localStorage.getItem("accessToken");
 const forms = await sdk.forms.getActiveForms(accessToken);
 
 // Get form by ID
-const form = await sdk.forms.getFormById(accessToken, "form-id");
+const form = await sdk.forms.getFormById(1, accessToken);
 
-// Admin: get all forms (including inactive)
+// Admin: get all forms
 const adminForms = await sdk.forms.getActiveFormsAdmin(accessToken);
 
 // Create form, stage, step (admin)
-const form = await sdk.forms.createForm(accessToken, { name: "Onboarding", ... });
-const stage = await sdk.forms.createStage(accessToken, { formId: form.id, ... });
-const step = await sdk.forms.createStep(accessToken, { stageId: stage.id, ... });
+const form = await sdk.forms.createForm({ name: "Vault Request", ... }, accessToken);
+const stage = await sdk.forms.createStage(1, { name: "Details", stageOrder: 1, ... }, accessToken);
+const step = await sdk.forms.createStep(1, { name: "Contact", stepOrder: 1, formFields: {}, ... }, accessToken);
 
 // Approve step response (admin)
-await sdk.forms.approveStepResponse(accessToken, instanceId, stepId, body);
+await sdk.forms.approveStepResponse(1, 1, { approved: true }, accessToken);
 
-// Get curator instances and metrics
-const instances = await sdk.forms.getInstancesByCurator(accessToken, curatorKey);
-const metrics = await sdk.forms.getCuratorMetrics(accessToken, curatorKey);
+// Approve entire form instance (admin)
+await sdk.forms.approveFormInstance(1, { approved: true, comments: "Approved" }, accessToken);
 
-// Create instance, update instance
-const instance = await sdk.forms.createInstance(accessToken, body);
-await sdk.forms.updateInstance(accessToken, instanceId, body);
+// Get vault instances and metrics
+const instances = await sdk.forms.getInstancesByVault("ydemo", accessToken);
+const instancesFiltered = await sdk.forms.getInstancesByVault("ydemo", accessToken, ["draft", "submitted"]);
+const metrics = await sdk.forms.getVaultMetrics("ydemo", accessToken);
+
+// Admin: get all instances (optional filters)
+const allInstances = await sdk.forms.getInstances(accessToken);
+const vaultInstances = await sdk.forms.getInstances(accessToken, { vaultKey: "ydemo" });
+const submittedInstances = await sdk.forms.getInstances(accessToken, { status: "submitted" });
+
+// Create instance (vault-scoped)
+const instance = await sdk.forms.createInstance("ydemo", { formId: 1 }, accessToken);
+await sdk.forms.updateInstance(1, { status: "in_progress" }, accessToken);
 
 // Save step response (draft)
-await sdk.forms.saveStepResponse(accessToken, instanceId, stepId, body);
+await sdk.forms.saveStepResponse(1, 1, { responseData: { name: "..." } }, accessToken);
 
 // Submit step response
-await sdk.forms.submitStepResponse(accessToken, instanceId, stepId, body);
+await sdk.forms.submitStepResponse(1, 1, accessToken);
 
 // Get step response
-const response = await sdk.forms.getStepResponse(accessToken, instanceId, stepId);
+const response = await sdk.forms.getStepResponse(1, 1, accessToken);
 ```
 
 ### Curator Handoff (`sdk.curatorHandoff`)

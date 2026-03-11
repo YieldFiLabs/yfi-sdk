@@ -65,11 +65,11 @@ export interface StepResponse {
 }
 
 /**
- * Onboarding Instance
+ * Form Instance (vault-scoped)
  */
 export interface OnboardingInstance {
     id: number;
-    curatorKey: string;
+    vaultKey: string;
     formId: number;
     status: 'draft' | 'in_progress' | 'submitted' | 'approved' | 'rejected';
     currentStageId?: number;
@@ -186,6 +186,24 @@ export interface ApproveStepResponseRequest {
     comments?: string;
 }
 
+/**
+ * Approve Form Instance Request (form-level approval)
+ */
+export interface ApproveFormInstanceRequest {
+    approved: boolean;
+    rejectionReason?: string;
+    comments?: string;
+}
+
+/**
+ * Approve Form Instance Response
+ */
+export interface ApproveFormInstanceResponse {
+    success: boolean;
+    message: string;
+    instance: Pick<OnboardingInstance, 'id' | 'vaultKey' | 'formId' | 'status' | 'completedAt'>;
+}
+
 // ==================== RESPONSE TYPES ====================
 
 /**
@@ -230,20 +248,30 @@ export interface CreateStepResponse {
 }
 
 /**
- * Get Instances By Curator Response
+ * Get Instances By Vault Response
  */
-export interface GetInstancesByCuratorResponse {
+export interface GetInstancesByVaultResponse {
     success: boolean;
-    curatorKey: string;
+    vaultKey: string;
     filter?: { status: string | string[] } | null;
     count: number;
     instances: OnboardingInstance[];
 }
 
 /**
- * Curator Instance Metrics
+ * Get Instances Response (Admin - with optional filters)
  */
-export interface CuratorMetrics {
+export interface GetInstancesResponse {
+    success: boolean;
+    filter: { vaultKey?: string | null; status?: string | string[] | null };
+    count: number;
+    instances: OnboardingInstance[];
+}
+
+/**
+ * Vault form instance metrics (counts by status)
+ */
+export interface VaultFormInstanceMetrics {
     total: number;
     draft: number;
     inProgress: number;
@@ -253,13 +281,22 @@ export interface CuratorMetrics {
 }
 
 /**
- * Get Curator Metrics Response
+ * Get Vault Metrics Response
  */
-export interface GetCuratorMetricsResponse {
+export interface GetVaultMetricsResponse {
     success: boolean;
-    curatorKey: string;
-    metrics: CuratorMetrics;
+    vaultKey: string;
+    metrics: VaultFormInstanceMetrics;
 }
+
+/** @deprecated Use GetInstancesByVaultResponse */
+export type GetInstancesByCuratorResponse = GetInstancesByVaultResponse;
+
+/** @deprecated Use GetVaultMetricsResponse */
+export type GetCuratorMetricsResponse = GetVaultMetricsResponse;
+
+/** @deprecated Use VaultFormInstanceMetrics */
+export type CuratorMetrics = VaultFormInstanceMetrics;
 
 /**
  * Get Instance By ID Response
