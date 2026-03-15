@@ -15,6 +15,7 @@ export const DEFAULT_CONFIG: Partial<SDKConfig> = {
     keystone: "ks",
     vault: "vault",
     points: "pts",
+    forum: "forum",
   },
   timeout: 30000,
   retryAttempts: 3,

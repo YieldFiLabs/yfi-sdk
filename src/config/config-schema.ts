@@ -23,6 +23,7 @@ export const SDKConfigSchema = z.object({
       keystone: z.string().default("ks"),
       vault: z.string().default("vault"),
       points: z.string().default("pts"),
+      forum: z.string().default("forum"),
     })
     .default({
       auth: "auth",
@@ -30,6 +31,7 @@ export const SDKConfigSchema = z.object({
       keystone: "ks",
       vault: "vault",
       points: "pts",
+      forum: "forum",
     }),
 
   /**

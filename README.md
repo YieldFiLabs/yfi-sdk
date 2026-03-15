@@ -4,6 +4,20 @@ Official YieldFi SDK for interacting with YieldFi services through the gateway.
 
 ## Version 0.3.x
 
+### New Features (0.3.16)
+
+- **Forum API** (`sdk.forum`): Proposals, discussions, and weighted voting
+  - `getProposals(filters?, accessToken?)` - List proposals (public)
+  - `getProposalById(id)` - Get proposal by ID (public)
+  - `createProposal(data, accessToken)` - Create proposal (auth)
+  - `getComments(proposalId)` - Get comments (public)
+  - `postComment(proposalId, content, accessToken, parentCommentId?)` - Post comment (auth)
+  - `getVotes(proposalId, accessToken?)` - Get vote summary and user's vote (public or auth)
+  - `getVotingPower(proposalId, accessToken)` - Preview voting power (auth)
+  - `castVote(proposalId, choice, accessToken)` - Cast vote (auth)
+  - `updateComment(commentId, content, accessToken)` - Update comment (auth)
+  - `deleteComment(commentId, accessToken)` - Delete comment (auth)
+
 ### New Features (0.3.15)
 
 - **Forms API - Vault-scoped instances**: Instances are now keyed by `vaultKey` instead of `curatorKey`

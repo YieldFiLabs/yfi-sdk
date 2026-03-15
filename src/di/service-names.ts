@@ -17,6 +17,7 @@ export const SERVICE_NAMES = {
   CURATOR_HANDOFF_API: "curatorHandoffAPI",
   CURATOR_API: "curatorAPI",
   POINTS_API: "pointsAPI",
+  FORUM_API: "forumAPI",
 } as const;
 
 export type ServiceName = (typeof SERVICE_NAMES)[keyof typeof SERVICE_NAMES];

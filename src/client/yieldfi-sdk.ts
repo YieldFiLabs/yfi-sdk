@@ -13,6 +13,7 @@ import { FormAPI } from "../api/forms";
 import { CuratorHandoffAPI } from "../api/curator-handoff";
 import { CuratorAPI } from "../api/curator";
 import { PointsAPI } from "../api/points";
+import { ForumAPI } from "../api/forum";
 import { V3API } from "./v3";
 
 /**
@@ -42,6 +43,11 @@ export class YieldFiSDK {
      * Points API (user points, balances, protocol points)
      */
     public points!: PointsAPI;
+
+    /**
+     * Forum API (proposals, comments, votes)
+     */
+    public forum!: ForumAPI;
 
     /**
      * V3 API namespace
@@ -144,6 +150,7 @@ export class YieldFiSDK {
             SERVICE_NAMES.GLASSBOOK_API,
         );
         this.points = this.container.get<PointsAPI>(SERVICE_NAMES.POINTS_API);
+        this.forum = this.container.get<ForumAPI>(SERVICE_NAMES.FORUM_API);
 
         // Initialize versioned API namespaces
         const vaultAPI = this.container.get<VaultAPI>(SERVICE_NAMES.VAULT_API);
@@ -230,6 +237,21 @@ export class YieldFiSDK {
             SERVICE_NAMES.POINTS_API,
             () =>
                 new PointsAPI(
+                    this.container.get(SERVICE_NAMES.HTTP_CLIENT),
+                    this.container.get(SERVICE_NAMES.CONFIG),
+                ),
+            {
+                singleton: true,
+                lazy: false, // Actively loaded
+                dependencies: [SERVICE_NAMES.HTTP_CLIENT, SERVICE_NAMES.CONFIG],
+            },
+        );
+
+        // Register ForumAPI (singleton, not lazy)
+        this.container.register(
+            SERVICE_NAMES.FORUM_API,
+            () =>
+                new ForumAPI(
                     this.container.get(SERVICE_NAMES.HTTP_CLIENT),
                     this.container.get(SERVICE_NAMES.CONFIG),
                 ),

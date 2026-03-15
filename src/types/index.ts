@@ -10,3 +10,4 @@ export * from "./forms";
 export * from "./curator-handoff";
 export * from "./curator";
 export * from "./points";
+export * from "./forum";
