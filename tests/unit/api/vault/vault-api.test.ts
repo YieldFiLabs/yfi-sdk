@@ -464,6 +464,23 @@ describe("VaultAPI", () => {
                 { headers: {} },
             );
         });
+
+        it("should list active changes for all vaults when chainId is omitted", async () => {
+            const expectedResponse: VaultChangesResponse = {
+                success: true,
+                changes: [],
+            };
+
+            mockHttpClient.get.mockResolvedValue(expectedResponse);
+
+            const result = await vaultAPI.getVaultChanges(testVaultKey);
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.get).toHaveBeenCalledWith(
+                `/vault/api/public/vaults/${testVaultKey}/changes`,
+                { headers: {} },
+            );
+        });
     });
 
     describe("getVaultChangeById", () => {

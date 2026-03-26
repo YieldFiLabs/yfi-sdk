@@ -924,16 +924,21 @@ export class VaultAPI {
   /**
    * List **active** vault changes — only rows where the current time is within
    * `[startTime, endTime]` (inclusive). Expired or not-yet-started windows are omitted.
+   * Omit **chainId** to list active changes across **all** vaults; pass **chainId** to scope by
+   * vault key + chain (matches path `:key`).
    * GET /vault/api/public/vaults/:key/changes
    */
   async getVaultChanges(
     vaultKey: string,
-    chainId: number = 1,
+    chainId?: number,
     accessToken?: string,
   ): Promise<VaultChangesResponse> {
     const queryParams = new URLSearchParams();
-    queryParams.append("chainId", chainId.toString());
-    const url = `/${this.servicePrefix}/api/public/vaults/${vaultKey}/changes?${queryParams.toString()}`;
+    if (chainId !== undefined) {
+      queryParams.append("chainId", chainId.toString());
+    }
+    const qs = queryParams.toString();
+    const url = `/${this.servicePrefix}/api/public/vaults/${vaultKey}/changes${qs ? `?${qs}` : ""}`;
 
     const response = await this.httpClient.get<VaultChangesResponse>(url, {
       headers: this.getAuthHeaders(accessToken),
@@ -942,18 +947,21 @@ export class VaultAPI {
   }
 
   /**
-   * Get a single vault change by id
+   * Get a single vault change by id. Omit **chainId** to match by vault key + id only.
    * GET /vault/api/public/vaults/:key/changes/:changeId
    */
   async getVaultChangeById(
     vaultKey: string,
     changeId: number,
-    chainId: number = 1,
+    chainId?: number,
     accessToken?: string,
   ): Promise<VaultChangeSingleResponse> {
     const queryParams = new URLSearchParams();
-    queryParams.append("chainId", chainId.toString());
-    const url = `/${this.servicePrefix}/api/public/vaults/${vaultKey}/changes/${changeId}?${queryParams.toString()}`;
+    if (chainId !== undefined) {
+      queryParams.append("chainId", chainId.toString());
+    }
+    const qs = queryParams.toString();
+    const url = `/${this.servicePrefix}/api/public/vaults/${vaultKey}/changes/${changeId}${qs ? `?${qs}` : ""}`;
 
     const response = await this.httpClient.get<VaultChangeSingleResponse>(url, {
       headers: this.getAuthHeaders(accessToken),

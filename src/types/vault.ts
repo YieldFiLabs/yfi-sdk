@@ -515,10 +515,11 @@ export interface VaultChange {
 
 /**
  * GET /vault/api/public/vaults/:key/changes
+ * `vaultKey` is set when `chainId` is provided (scoped list); omitted when listing all vaults.
  */
 export interface VaultChangesResponse {
   success: boolean;
-  vaultKey: string;
+  vaultKey?: string;
   changes: VaultChange[];
 }
 
