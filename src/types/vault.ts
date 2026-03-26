@@ -498,3 +498,45 @@ export interface UpdateRedemptionJobSettingsResponse {
   data: RedemptionJobSettings;
 }
 
+/**
+ * Vault change record (scheduled window / announcement)
+ */
+export interface VaultChange {
+  id: number;
+  type: string;
+  startTime: string;
+  endTime: string;
+  metadata: Record<string, unknown>;
+  vaultKey: string;
+  chainId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * GET /vault/api/public/vaults/:key/changes
+ */
+export interface VaultChangesResponse {
+  success: boolean;
+  vaultKey: string;
+  changes: VaultChange[];
+}
+
+/**
+ * GET /vault/api/public/vaults/:key/changes/:changeId
+ */
+export interface VaultChangeSingleResponse {
+  success: boolean;
+  change: VaultChange;
+}
+
+/**
+ * POST /vault/api/vaults/:key/changes — create vault change (curator or admin)
+ */
+export interface CreateVaultChangeRequest {
+  type: string;
+  startTime: string;
+  endTime: string;
+  metadata?: Record<string, unknown>;
+}
+

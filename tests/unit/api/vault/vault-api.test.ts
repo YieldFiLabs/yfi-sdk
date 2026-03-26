@@ -17,6 +17,9 @@ import {
     AddWhitelistedAssetRequest,
     VaultFaqsResponse,
     StrategiesResponse,
+    VaultChangesResponse,
+    VaultChangeSingleResponse,
+    CreateVaultChangeRequest,
 } from "../../../../src/types";
 import {
     VaultSlaBody,
@@ -427,6 +430,103 @@ describe("VaultAPI", () => {
 
             await expect(vaultAPI.getVaultFaqs(testVaultKey, testChainId)).rejects.toThrow(
                 NetworkError,
+            );
+        });
+    });
+
+    describe("getVaultChanges", () => {
+        it("should list vault changes", async () => {
+            const expectedResponse: VaultChangesResponse = {
+                success: true,
+                vaultKey: testVaultKey,
+                changes: [
+                    {
+                        id: 1,
+                        type: "maintenance",
+                        startTime: "2025-01-01T00:00:00.000Z",
+                        endTime: "2025-01-01T04:00:00.000Z",
+                        metadata: { note: "Planned downtime" },
+                        vaultKey: testVaultKey,
+                        chainId: testChainId,
+                        createdAt: "2024-12-01T00:00:00.000Z",
+                        updatedAt: "2024-12-01T00:00:00.000Z",
+                    },
+                ],
+            };
+
+            mockHttpClient.get.mockResolvedValue(expectedResponse);
+
+            const result = await vaultAPI.getVaultChanges(testVaultKey, testChainId);
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.get).toHaveBeenCalledWith(
+                `/vault/api/public/vaults/${testVaultKey}/changes?chainId=${testChainId}`,
+                { headers: {} },
+            );
+        });
+    });
+
+    describe("getVaultChangeById", () => {
+        it("should get a single vault change", async () => {
+            const expectedResponse: VaultChangeSingleResponse = {
+                success: true,
+                change: {
+                    id: 42,
+                    type: "announcement",
+                    startTime: "2025-02-01T00:00:00.000Z",
+                    endTime: "2025-02-01T23:59:59.000Z",
+                    metadata: {},
+                    vaultKey: testVaultKey,
+                    chainId: testChainId,
+                    createdAt: "2025-01-01T00:00:00.000Z",
+                    updatedAt: "2025-01-01T00:00:00.000Z",
+                },
+            };
+
+            mockHttpClient.get.mockResolvedValue(expectedResponse);
+
+            const result = await vaultAPI.getVaultChangeById(testVaultKey, 42, testChainId);
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.get).toHaveBeenCalledWith(
+                `/vault/api/public/vaults/${testVaultKey}/changes/42?chainId=${testChainId}`,
+                { headers: {} },
+            );
+        });
+    });
+
+    describe("createVaultChange", () => {
+        it("should create a vault change", async () => {
+            const body: CreateVaultChangeRequest = {
+                type: "maintenance",
+                startTime: "2025-03-01T00:00:00.000Z",
+                endTime: "2025-03-01T00:00:00.000Z",
+                metadata: { source: "ops" },
+            };
+            const expectedResponse: VaultChangeSingleResponse = {
+                success: true,
+                change: {
+                    id: 99,
+                    type: body.type,
+                    startTime: body.startTime,
+                    endTime: body.endTime,
+                    metadata: body.metadata ?? {},
+                    vaultKey: testVaultKey,
+                    chainId: testChainId,
+                    createdAt: "2025-01-01T00:00:00.000Z",
+                    updatedAt: "2025-01-01T00:00:00.000Z",
+                },
+            };
+
+            mockHttpClient.post.mockResolvedValue(expectedResponse);
+
+            const result = await vaultAPI.createVaultChange(testAccessToken, testVaultKey, body, testChainId);
+
+            expect(result).toEqual(expectedResponse);
+            expect(mockHttpClient.post).toHaveBeenCalledWith(
+                `/vault/api/vaults/${testVaultKey}/changes?chainId=${testChainId}`,
+                body,
+                { headers: { Authorization: `Bearer ${testAccessToken}` } },
             );
         });
     });

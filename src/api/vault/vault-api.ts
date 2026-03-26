@@ -33,6 +33,9 @@ import {
   RedemptionJobSettingsResponse,
   UpdateRedemptionJobSettingsRequest,
   UpdateRedemptionJobSettingsResponse,
+  VaultChangesResponse,
+  VaultChangeSingleResponse,
+  CreateVaultChangeRequest,
 } from "../../types";
 
 export class VaultAPI {
@@ -911,6 +914,68 @@ export class VaultAPI {
     const url = `/${this.servicePrefix}/api/vaults/${vaultKey}/settings`;
 
     const response = await this.httpClient.put<UpdateRedemptionJobSettingsResponse>(url, body, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  // ==================== VAULT CHANGES ====================
+
+  /**
+   * List **active** vault changes — only rows where the current time is within
+   * `[startTime, endTime]` (inclusive). Expired or not-yet-started windows are omitted.
+   * GET /vault/api/public/vaults/:key/changes
+   */
+  async getVaultChanges(
+    vaultKey: string,
+    chainId: number = 1,
+    accessToken?: string,
+  ): Promise<VaultChangesResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append("chainId", chainId.toString());
+    const url = `/${this.servicePrefix}/api/public/vaults/${vaultKey}/changes?${queryParams.toString()}`;
+
+    const response = await this.httpClient.get<VaultChangesResponse>(url, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  /**
+   * Get a single vault change by id
+   * GET /vault/api/public/vaults/:key/changes/:changeId
+   */
+  async getVaultChangeById(
+    vaultKey: string,
+    changeId: number,
+    chainId: number = 1,
+    accessToken?: string,
+  ): Promise<VaultChangeSingleResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append("chainId", chainId.toString());
+    const url = `/${this.servicePrefix}/api/public/vaults/${vaultKey}/changes/${changeId}?${queryParams.toString()}`;
+
+    const response = await this.httpClient.get<VaultChangeSingleResponse>(url, {
+      headers: this.getAuthHeaders(accessToken),
+    });
+    return response;
+  }
+
+  /**
+   * Create a vault change (**admin only**)
+   * POST /vault/api/vaults/:key/changes
+   */
+  async createVaultChange(
+    accessToken: string,
+    vaultKey: string,
+    body: CreateVaultChangeRequest,
+    chainId: number = 1,
+  ): Promise<VaultChangeSingleResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append("chainId", chainId.toString());
+    const url = `/${this.servicePrefix}/api/vaults/${vaultKey}/changes?${queryParams.toString()}`;
+
+    const response = await this.httpClient.post<VaultChangeSingleResponse>(url, body, {
       headers: this.getAuthHeaders(accessToken),
     });
     return response;
