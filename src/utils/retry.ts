@@ -2,11 +2,17 @@
  * Retry utilities for failed operations
  */
 
+import { isAxiosError } from "axios";
+
 export interface RetryOptions {
   maxAttempts: number;
   delay: number;
   backoff?: boolean;
   onRetry?: (attempt: number, error: Error) => void;
+  /**
+   * When false, the error is rethrown immediately (no further attempts).
+   */
+  retryIf?: (error: unknown) => boolean;
 }
 
 const DEFAULT_RETRY_OPTIONS: RetryOptions = {
@@ -23,6 +29,7 @@ export async function retry<T>(
   options: Partial<RetryOptions> = {},
 ): Promise<T> {
   const opts = { ...DEFAULT_RETRY_OPTIONS, ...options };
+  const retryIf = opts.retryIf ?? (() => true);
   let lastError: Error;
 
   for (let attempt = 1; attempt <= opts.maxAttempts; attempt++) {
@@ -31,7 +38,7 @@ export async function retry<T>(
     } catch (error) {
       lastError = error as Error;
 
-      if (attempt < opts.maxAttempts) {
+      if (attempt < opts.maxAttempts && retryIf(error)) {
         if (opts.onRetry) {
           opts.onRetry(attempt, lastError);
         }
@@ -41,6 +48,10 @@ export async function retry<T>(
           : opts.delay;
 
         await sleep(delay);
+      } else if (attempt >= opts.maxAttempts) {
+        break;
+      } else {
+        throw lastError;
       }
     }
   }
@@ -71,4 +82,38 @@ export function isRetryableError(error: Error): boolean {
   ];
 
   return retryableMessages.some((msg) => message.includes(msg));
+}
+
+/**
+ * Whether an axios (or network) failure is worth retrying.
+ * Avoids retrying client errors (4xx except 408/429) so mutating requests are not repeated pointlessly.
+ */
+export function isRetryableAxiosError(error: unknown): boolean {
+  if (isAxiosError(error)) {
+    if (
+      error.code === "ECONNABORTED" ||
+      error.code === "ETIMEDOUT" ||
+      error.code === "ECONNRESET"
+    ) {
+      return true;
+    }
+    if (error.response == null) {
+      return true;
+    }
+    const status = error.response.status;
+    return (
+      status === 408 ||
+      status === 429 ||
+      status === 500 ||
+      status === 502 ||
+      status === 503 ||
+      status === 504
+    );
+  }
+
+  if (error instanceof Error) {
+    return isRetryableError(error);
+  }
+
+  return false;
 }
