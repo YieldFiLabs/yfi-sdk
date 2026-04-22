@@ -327,7 +327,7 @@ export class YieldFiSDK {
      * Get SDK version
      */
     public static getVersion(): string {
-        return "0.1.0";
+        return "0.4.1";
     }
 
     /**

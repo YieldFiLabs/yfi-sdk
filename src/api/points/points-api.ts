@@ -12,6 +12,7 @@ import {
   UserBalancesResponse,
   ProtocolPointsResponse,
   PointsApiResponse,
+  PointsLeaderboardResult,
 } from "../../types";
 
 export class PointsAPI {
@@ -127,6 +128,34 @@ export class PointsAPI {
       `/${this.servicePrefix}/api/points/protocol/${encodeURIComponent(protocolId)}`,
       {
         headers: this.getAuthHeaders(accessToken),
+        params: options,
+      },
+    );
+    return response.data;
+  }
+
+  /**
+   * Public leaderboard aggregated from pt_points (gateway)
+   * GET /api/public/points/leaderboard/:protocolId
+   *
+   * Response includes `totalPoints`: sum of all points for the protocol (not limited by pagination).
+   *
+   * @param protocolId Protocol identifier (matches pt_points.protocol_id)
+   * @param options Optional limit, offset, chainId
+   */
+  async getPointsLeaderboard(
+    protocolId: string,
+    options?: {
+      limit?: number;
+      offset?: number;
+      chainId?: string;
+    },
+  ): Promise<PointsLeaderboardResult> {
+    const response = await this.httpClient.get<
+      PointsApiResponse<PointsLeaderboardResult>
+    >(
+      `/api/public/points/leaderboard/${encodeURIComponent(protocolId)}`,
+      {
         params: options,
       },
     );
