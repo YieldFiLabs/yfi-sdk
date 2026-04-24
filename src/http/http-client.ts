@@ -10,7 +10,7 @@ import {
   RateLimitError,
   AuthenticationError,
 } from "../errors";
-import { retry, isRetryableError } from "../utils";
+import { retry, isRetryableError, isRetryableAxiosError } from "../utils";
 
 export interface RequestOptions {
   headers?: Record<string, string>;
@@ -28,7 +28,6 @@ export class HttpClient {
       headers: {
         "Content-Type": "application/json",
       },
-      validateStatus: () =>  true, // pass the information as is
     });
   }
 
@@ -81,6 +80,7 @@ export class HttpClient {
         {
           maxAttempts: this.config.retryAttempts,
           delay: this.config.retryDelay,
+          retryIf: isRetryableAxiosError,
           onRetry: (attempt, error) => {
             if (this.config.debug) {
               console.log(

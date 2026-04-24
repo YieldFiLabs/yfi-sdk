@@ -93,8 +93,12 @@ export function decodeJWT(token: string): JWTPayload {
     // Decode the payload (second part)
     const payload = parts[1];
 
-    // Base64 decode (handle URL-safe base64)
-    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    // Base64url decode (JWT payloads may omit padding)
+    let base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padLen = (4 - (base64.length % 4)) % 4;
+    if (padLen > 0) {
+      base64 += "=".repeat(padLen);
+    }
     const jsonPayload = Buffer.from(base64, "base64").toString("utf8");
 
     return JSON.parse(jsonPayload) as JWTPayload;
